@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Design Specs</h1>
+<div class="toolbar">
+  <label>Design: <select id="spec-design-select" onchange="loadSpecs()"></select></label>
+</div>
+
+<div id="specs-empty" class="empty-state" style="display:none">
+  <p>No designs evaluated yet</p>
+  <p class="hint">Designs appear here as optimization runs</p>
+</div>
+
+<div class="spec-grid" id="specs-grid">
+  <div class="spec-card">
+    <h3>Hull Form</h3>
+    <div id="hull-form-data" class="spec-data">
+      <div class="spec-row"><span class="spec-label">LWL</span><span class="spec-val" id="s-lwl">-</span></div>
+      <div class="spec-row"><span class="spec-label">Beam</span><span class="spec-val" id="s-beam">-</span></div>
+      <div class="spec-row"><span class="spec-label">Draft</span><span class="spec-val" id="s-draft">-</span></div>
+      <div class="spec-row"><span class="spec-label">Displacement</span><span class="spec-val" id="s-disp">-</span></div>
+      <div class="spec-row"><span class="spec-label">Cp</span><span class="spec-val" id="s-cp">-</span></div>
+      <div class="spec-row"><span class="spec-label">Ballast %</span><span class="spec-val" id="s-ballast">-</span></div>
+      <div class="spec-row"><span class="spec-label">CG_z</span><span class="spec-val" id="s-cgz">-</span></div>
+    </div>
+  </div>
+
+  <div class="spec-card wide">
+    <h3>GZ Curve & Righting Energy</h3>
+    <canvas id="gz-chart" height="220"></canvas>
+    <div class="spec-summary" id="gz-summary"></div>
+  </div>
+
+  <div class="spec-card">
+    <h3>Resistance</h3>
+    <canvas id="res-chart" height="180"></canvas>
+    <div class="spec-summary" id="res-summary"></div>
+  </div>
+
+  <div class="spec-card">
+    <h3>Stability</h3>
+    <div id="stab-data" class="spec-data">
+      <div class="spec-row"><span class="spec-label">BM</span><span class="spec-val" id="s-bm">-</span></div>
+      <div class="spec-row"><span class="spec-label">BML</span><span class="spec-val" id="s-bml">-</span></div>
+      <div class="spec-row"><span class="spec-label">Righting Energy</span><span class="spec-val" id="s-re">-</span></div>
+      <div class="spec-row"><span class="spec-label">Self-righting</span><span class="spec-val" id="s-sr">-</span></div>
+      <div class="spec-row"><span class="spec-label">Roll Period</span><span class="spec-val" id="s-rp">-</span></div>
+    </div>
+  </div>
+
+  <div class="spec-card wide">
+    <h3>Constraint Status</h3>
+    <div id="constraint-list" class="constraint-grid"></div>
+    <div class="spec-summary" id="constraint-summary"></div>
+  </div>
+</div>
+
+<script>
+let gzChart, resChart;
+
+async function loadDesignList() {
+  const r = await fetch('/api/designs?limit=100');
+  const raw = await r.json();
+  const designs = Array.isArray(raw) ? raw : [];
+
+  const empty = document.getElementById('specs-empty');
+  const grid = document.getElementById('specs-grid');
+
+  if (designs.length === 0) {
+    empty.style.display = 'block';
+    grid.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.style.display = 'grid';
+
+  const sel = document.getElementById('spec-design-select');
+  const prevVal = sel.value;
+  sel.innerHTML = '';
+  for (const d of designs) {
+    const opt = document.createElement('option');
+    opt.value = d.id;
+    opt.textContent = `#${d.id} iter=${d.iter} FoM=${d.fom?.toFixed(2) || '?'}`;
+    sel.appendChild(opt);
+  }
+  if (prevVal && [...sel.options].some(o => o.value === prevVal)) {
+    sel.value = prevVal;
+  }
+  loadSpecs();
+}
+
+async function loadSpecs() {
+  const id = document.getElementById('spec-design-select').value;
+  if (!id) return;
+
+  const r = await fetch(`/api/designs/${id}`);
+  const d = await r.json();
+
+  // hull form
+  let dv = [];
+  try { dv = JSON.parse(d.design_vector); } catch(e) {}
+  const paramNames = ['LWL','BWL','T_canoe','Cp','Cm','LCB','D_keel','keel_chord','bulb_vol','bulb_pos','E','SA','flare','deadrise','bilge_r','keel_rake','ballast_frac'];
+  const xd = {};
+  paramNames.forEach((n,i) => xd[n] = dv[i]);
+
+  document.getElementById('s-lwl').textContent = (xd.LWL || '2.4') + ' m';
+  document.getElementById('s-beam').textContent = (xd.BWL || '?') + ' m';
+  document.getElementById('s-draft').textContent = (xd.T_canoe || '?') + ' m';
+  document.getElementById('s-disp').textContent = '0.30 m³';
+  document.getElementById('s-cp').textContent = xd.Cp || '?';
+  document.getElementById('s-ballast').textContent = ((xd.ballast_frac||0) * 100).toFixed(0) + '%';
+  document.getElementById('s-cgz').textContent = '-';
+
+  // GZ curve
+  const gzr = await fetch(`/api/designs/${id}/gz`);
+  if (gzr.ok) {
+    const gz = await gzr.json();
+    if (gz.angles && gz.gz) {
+      if (gzChart) gzChart.destroy();
+      const ctx = document.getElementById('gz-chart').getContext('2d');
+      gzChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: gz.angles.map(a => a.toFixed(0)),
+          datasets: [
+            { label: 'GZ (m)', data: gz.gz, borderColor: '#44cc88', backgroundColor: 'rgba(68,204,136,0.1)', fill: true, pointRadius: 2 },
+          ]
+        },
+        options: {
+          scales: { x:{title:{display:true,text:'Heel (°)'}}, y:{title:{display:true,text:'GZ (m)'}} },
+          plugins: { annotation: undefined }
+        }
+      });
+      const re = gz.gz.reduce((sum, g, i) => {
+        if (i === 0) return 0;
+        const da = (gz.angles[i] - gz.angles[i-1]) * Math.PI / 180;
+        return sum + Math.abs(g) * da;
+      }, 0);
+      document.getElementById('s-cgz').textContent = (gz.cg_z || 0).toFixed(3) + ' m';
+      document.getElementById('gz-summary').innerHTML = `
+        <span class="tag">Righting Energy ~ ${(re * 1025 * 9.81 * 0.3).toFixed(0)} J</span>
+        <span class="tag ${gz.gz.some(g => g > 0.01) ? 'tag-green' : 'tag-red'}">${gz.gz.some(g => g > 0.01) ? 'Stable' : 'Unstable'}</span>
+      `;
+    }
+  }
+
+  // constraint values
+  const cv = d.constraint_values || {};
+  const clist = document.getElementById('constraint-list');
+  clist.innerHTML = '';
+  let allPass = true;
+  const violations = d.constraint_violations || [];
+  const violSet = new Set();
+  violations.forEach(v => {
+    const k = v.split('=')[0].trim();
+    violSet.add(k);
+  });
+
+  for (const [key, val] of Object.entries(cv)) {
+    if (key.endsWith('_note')) continue;
+    const isViol = violSet.has(key);
+    if (isViol) allPass = false;
+    const div = document.createElement('div');
+    div.className = `constraint-item ${isViol ? 'viol' : 'pass'}`;
+    const vStr = typeof val === 'number' ? val.toFixed(4) : val;
+    div.innerHTML = `<span class="constraint-key">${key}</span><span class="constraint-val">${vStr}</span><span class="constraint-icon">${isViol ? '❌' : '✅'}</span>`;
+    clist.appendChild(div);
+  }
+  document.getElementById('constraint-summary').innerHTML = `
+    <span class="tag ${allPass ? 'tag-green' : 'tag-red'}">${allPass ? 'All constraints passed' : `${violations.length} violation(s)`}</span>
+  `;
+
+  // resistance breakdown
+  if (resChart) resChart.destroy();
+  if (d.rt_total != null) {
+    const ctx2 = document.getElementById('res-chart').getContext('2d');
+    const rw = d.rt_wave || 0;
+    const rf = d.rt_friction || 0;
+    resChart = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ['Wave', 'Friction'],
+        datasets: [{ data: [rw, rf], backgroundColor: ['#cc8844', '#44aacc'] }]
+      }
+    });
+    document.getElementById('res-summary').innerHTML = `
+      <span class="tag">Rt = ${d.rt_total.toFixed(1)} N</span>
+      <span class="tag">Rw = ${rw.toFixed(1)} N</span>
+      <span class="tag">Rf = ${rf.toFixed(1)} N</span>
+    `;
+  }
+
+  // stability
+  document.getElementById('s-bm').textContent = cv.BM?.toFixed(3) + ' m' || '-';
+  document.getElementById('s-bml').textContent = '-';
+  document.getElementById('s-re').textContent = cv.righting_energy?.toFixed(1) + ' J' || '-';
+  document.getElementById('s-sr').textContent = cv.self_righting ? '✅' : '❌';
+  document.getElementById('s-rp').textContent = (d.roll_period?.toFixed(2) || '?') + ' s';
+}
+
+loadDesignList();
+setInterval(loadDesignList, 15000);
+</script>
+{% endblock %}

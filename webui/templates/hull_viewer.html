@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/STLLoader.js"></script>
+{% endblock %}
+{% block content %}
+<h1>3D Hull Viewer</h1>
+<div class="toolbar">
+  <label>Design: <select id="design-select" onchange="loadHull()"></select></label>
+  <label>View: <select id="view-preset" onchange="setView()">
+    <option value="iso">Isometric</option>
+    <option value="front">Front</option>
+    <option value="side">Side</option>
+    <option value="top">Top</option>
+  </select></label>
+  <button onclick="resetCamera()">Reset</button>
+</div>
+<div id="hull-empty" class="empty-state" style="display:none">
+  <p>No designs with STL data yet</p>
+  <p class="hint">Designs appear here as optimization runs</p>
+</div>
+<div id="hull-container" style="width:100%;height:70vh;background:#111;border-radius:8px;"></div>
+<div id="hull-info" class="info-bar"></div>
+
+<script>
+let scene, camera, renderer, controls, hullMesh;
+const container = document.getElementById('hull-container');
+
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x111111);
+
+  camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera.position.set(4, 3, 5);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(renderer.domElement);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.1;
+
+  const ambient = new THREE.AmbientLight(0x404060);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+  dir.position.set(5, 10, 7);
+  scene.add(dir);
+  const fill = new THREE.DirectionalLight(0x4466aa, 0.4);
+  fill.position.set(-3, -2, -5);
+  scene.add(fill);
+
+  const grid = new THREE.GridHelper(6, 12, 0x4466aa, 0x223366);
+  grid.position.y = -0.5;
+  scene.add(grid);
+
+  animate();
+  loadDesignList();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function setView() {
+  const v = document.getElementById('view-preset').value;
+  const d = 6;
+  switch(v) {
+    case 'iso': camera.position.set(4, 3, 5); break;
+    case 'front': camera.position.set(0, 0, d); break;
+    case 'side': camera.position.set(d, 0, 0); break;
+    case 'top': camera.position.set(0, d, 0); break;
+  }
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+function resetCamera() {
+  camera.position.set(4, 3, 5);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+async function loadDesignList() {
+  const r = await fetch('/api/designs?limit=100');
+  const raw = await r.json();
+  const designs = Array.isArray(raw) ? raw : [];
+
+  const empty = document.getElementById('hull-empty');
+  if (designs.length === 0) {
+    empty.style.display = 'block';
+    container.style.display = 'none';
+    document.getElementById('hull-info').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  container.style.display = 'block';
+  document.getElementById('hull-info').style.display = 'block';
+
+  const sel = document.getElementById('design-select');
+  const prevVal = sel.value;
+  sel.innerHTML = '';
+  for (const d of designs) {
+    const opt = document.createElement('option');
+    opt.value = d.id;
+    opt.textContent = `#${d.id} iter=${d.iter} FoM=${d.fom?.toFixed(2) || '?'}`;
+    sel.appendChild(opt);
+  }
+  if (prevVal && [...sel.options].some(o => o.value === prevVal)) {
+    sel.value = prevVal;
+  }
+  loadHull();
+}
+
+async function loadHull() {
+  const id = document.getElementById('design-select').value;
+  if (!id) return;
+
+  if (hullMesh) { scene.remove(hullMesh); hullMesh = undefined; }
+
+  const r = await fetch(`/api/designs/${id}`);
+  const d = await r.json();
+
+  document.getElementById('hull-info').innerHTML = `
+    <strong>Design #${d.id}</strong> |
+    Iter: ${d.iter} | FoM: ${d.fom?.toFixed(4) || 'N/A'} |
+    Rt: ${d.rt_total?.toFixed(1) || '?'} N |
+    Feasible: ${d.feasible ? '✅' : '❌'}
+  `;
+
+  const loader = new THREE.STLLoader();
+  loader.load(`/api/designs/${id}/stl`,
+    geometry => {
+      geometry.center();
+      const mat = new THREE.MeshPhongMaterial({
+        color: 0x4488cc,
+        specular: 0x224466,
+        shininess: 30,
+        flatShading: true,
+      });
+      hullMesh = new THREE.Mesh(geometry, mat);
+      scene.add(hullMesh);
+    },
+    undefined,
+    err => console.warn('STL load error:', err)
+  );
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+});
+
+init();
+setInterval(loadDesignList, 15000);
+</script>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Results</h1>
+
+<div class="chart-row">
+  <div class="chart-box">
+    <h3>Parallel Coordinates (all designs)</h3>
+    <canvas id="parallel-chart" height="300"></canvas>
+    <div id="parallel-empty" class="empty-state" style="display:none"><p>No designs yet</p><p class="hint">Designs appear here as optimization runs</p></div>
+  </div>
+  <div class="chart-box">
+    <h3>Calibration History</h3>
+    <canvas id="cal-chart" height="300"></canvas>
+    <div id="cal-empty" class="empty-state" style="display:none"><p>No calibrations yet</p></div>
+  </div>
+</div>
+
+<h3>Top Designs</h3>
+<div style="overflow-x:auto">
+<table class="data-table" id="results-table">
+  <thead>
+    <tr>
+      <th>ID</th><th>Iter</th><th>FoM</th><th>Rt (N)</th><th>Rw (N)</th><th>Rf (N)</th>
+      <th>Roll Per.</th><th>Accel (g)</th><th>Feasible</th><th>Design Vector</th>
+    </tr>
+  </thead>
+  <tbody id="results-tbody"></tbody>
+</table>
+<div id="results-empty" class="empty-state"><p>No designs evaluated yet</p><p class="hint">Start optimization or run a dry run first</p></div>
+</div>
+
+<script>
+let parallelChart, calChart;
+
+async function loadResults() {
+  try {
+  const r = await fetch('/api/designs?limit=200');
+  const raw = await r.json();
+  const designs = Array.isArray(raw) ? raw : [];
+
+  // toggle empty states
+  document.getElementById('results-empty').style.display = designs.length > 0 ? 'none' : 'block';
+
+  const tbody = document.getElementById('results-tbody');
+  tbody.innerHTML = '';
+  for (const d of designs) {
+    const tr = document.createElement('tr');
+    tr.className = d.feasible ? '' : 'infeasible';
+    let dv = '';
+    try { dv = JSON.parse(d.design_vector).map(v => v.toFixed(3)).join(', '); } catch(e) { dv = d.design_vector; }
+    tr.innerHTML = `
+      <td>${d.id}</td>
+      <td>${d.iter}</td>
+      <td><strong>${d.fom?.toFixed(3) || '-'}</strong></td>
+      <td>${d.rt_total?.toFixed(1) || '-'}</td>
+      <td>${d.rt_wave?.toFixed(1) || '-'}</td>
+      <td>${d.rt_friction?.toFixed(1) || '-'}</td>
+      <td>${d.roll_period?.toFixed(2) || '-'}</td>
+      <td>${d.peak_accel?.toFixed(2) || '-'}</td>
+      <td>${d.feasible ? '✅' : '❌'}</td>
+      <td class="dv-cell">${dv}</td>
+    `;
+    tr.style.cursor = 'pointer';
+    tr.onclick = () => window.location.href = `/specs?design=${d.id}`;
+    tbody.appendChild(tr);
+  }
+
+  // parallel coordinates
+  if (parallelChart) parallelChart.destroy();
+  const names = ['LWL','BWL','T_canoe','Cp','Cm','LCB','D_keel','keel_chord','bulb_vol','bulb_pos','E','SA','flare','deadrise','bilge_r','keel_rake','ballast_frac'];
+  const bounds = [[2.3,2.5],[0.4,0.6],[0.15,0.35],[0.55,0.65],[0.6,0.9],[5.0,20.0],[0.85,1.2],[0.15,0.25],[0.001,0.05],[0.3,0.5],[0.15,0.3],[0.05,0.25],[0.5,1.2],[5.0,25.0],[0.05,0.3],[0.001,0.02],[0.3,0.7]];
+
+  const pe = document.getElementById('parallel-empty');
+  if (designs.length === 0) { pe.style.display = 'block'; }
+  else {
+    pe.style.display = 'none';
+    const datasets = [];
+    for (const d of designs) {
+      let dv;
+      try { dv = JSON.parse(d.design_vector); } catch(e) { continue; }
+      if (dv.length !== 17) continue;
+      const norm = dv.map((v, i) => (v - bounds[i][0]) / (bounds[i][1] - bounds[i][0]));
+      datasets.push({
+        label: `#${d.id}`,
+        data: norm.map((v, i) => ({x: i, y: v})),
+        borderColor: d.feasible ? 'rgba(68,204,136,0.3)' : 'rgba(204,68,68,0.15)',
+        borderWidth: 1,
+        pointRadius: 0,
+        showLine: true,
+        tension: 0,
+      });
+    }
+
+    const ctx = document.getElementById('parallel-chart').getContext('2d');
+    parallelChart = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: {
+        scales: {
+          x: { type: 'linear', min: -0.1, max: 16.1, ticks: { callback: v => names[v] || '' } },
+          y: { min: 0, max: 1, title: { display: true, text: 'Normalized' } }
+        },
+        plugins: { legend: { display: false } },
+        responsive: true,
+      }
+    });
+  }
+
+  // calibration chart
+  const calR = await fetch('/api/calibrations');
+  const calRaw = await calR.json();
+  const calsArr = Array.isArray(calRaw) ? calRaw : [];
+
+  if (calChart) calChart.destroy();
+  const ce = document.getElementById('cal-empty');
+  if (calsArr.length === 0) { ce.style.display = 'block'; }
+  else {
+    ce.style.display = 'none';
+    const ctx2 = document.getElementById('cal-chart').getContext('2d');
+    calChart = new Chart(ctx2, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Drag Correction',
+          data: calsArr.map(c => ({x: c.iter, y: c.delta})),
+          backgroundColor: '#cc66cc',
+          pointRadius: 6,
+        }]
+      },
+      options: {
+        scales: { x:{title:{display:true,text:'Iteration'}}, y:{title:{display:true,text:'δ (N)'}} },
+        plugins: { legend: { display: false } },
+        responsive: true,
+      }
+    });
+  }
+  } catch(e) {}
+}
+
+loadResults();
+setInterval(loadResults, 15000);
+</script>
+{% endblock %}

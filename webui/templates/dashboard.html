@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="card-grid">
+  <div class="card" id="card-status">
+    <div class="card-title">Status</div>
+    <div class="card-value" id="dash-status">Loading...</div>
+  </div>
+  <div class="card" id="card-iter">
+    <div class="card-title">Iteration</div>
+    <div class="card-value" id="dash-iter">-</div>
+    <div class="card-subtitle" id="dash-total">/ -</div>
+  </div>
+  <div class="card accent" id="card-fom">
+    <div class="card-title">Best FoM</div>
+    <div class="card-value" id="dash-fom">-</div>
+  </div>
+  <div class="card" id="card-feas">
+    <div class="card-title">Feasible</div>
+    <div class="card-value" id="dash-feas">-</div>
+    <div class="card-subtitle" id="dash-feas-total">/ - total</div>
+  </div>
+  <div class="card" id="card-rt">
+    <div class="card-title">Best Rt</div>
+    <div class="card-value" id="dash-rt">-</div>
+    <div class="card-subtitle">N</div>
+  </div>
+  <div class="card" id="card-elapsed">
+    <div class="card-title">Elapsed</div>
+    <div class="card-value" id="dash-elapsed">-</div>
+  </div>
+</div>
+
+<div class="control-bar">
+  <button class="btn btn-success" id="btn-start" onclick="startOpt()">Start Optimization</button>
+  <button class="btn btn-danger" id="btn-stop" onclick="stopOpt()" disabled>Stop</button>
+  <button class="btn btn-reset" id="btn-reset" onclick="showResetStep1()">Reset Database</button>
+</div>
+
+<div class="chart-row">
+  <div class="chart-box">
+    <h3>Convergence</h3>
+    <canvas id="conv-chart" height="250"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>Feasibility</h3>
+    <canvas id="feas-chart" height="250"></canvas>
+  </div>
+</div>
+
+<div class="chart-row">
+  <div class="chart-box">
+    <h3>Resistance Distribution</h3>
+    <canvas id="rt-chart" height="250"></canvas>
+  </div>
+  <div class="chart-box" id="violation-box">
+    <h3>Common Violations</h3>
+    <div id="violation-list"><em>Loading...</em></div>
+  </div>
+</div>
+
+<script>
+let convChart, feasChart, rtChart;
+
+async function poll() {
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    document.getElementById('dash-status').textContent = s.running ? 'Running' : 'Idle';
+    document.getElementById('dash-iter').textContent = s.current_iter || 0;
+    document.getElementById('dash-total').textContent = `/ ${s.total || 0} total`;
+    document.getElementById('dash-fom').textContent = s.best_fom?.toFixed(4) || '-';
+    document.getElementById('dash-feas').textContent = s.feasible || 0;
+    document.getElementById('dash-feas-total').textContent = `/ ${s.total || 0} total`;
+    document.getElementById('dash-rt').textContent = s.best_rt?.toFixed(1) || '-';
+    if (s.elapsed_s) {
+      const m = Math.floor(s.elapsed_s / 60);
+      const sec = s.elapsed_s % 60;
+      document.getElementById('dash-elapsed').textContent = `${m}m ${sec}s`;
+    }
+    document.getElementById('btn-start').disabled = s.running;
+    document.getElementById('btn-stop').disabled = !s.running;
+  } catch(e) {}
+}
+
+async function startOpt() {
+  if (!confirm('Start optimization? This will run for hours.')) return;
+  const r = await fetch('/api/optimization/start', {method:'POST'});
+  if (!r.ok) { alert((await r.json()).detail); return; }
+  poll();
+}
+
+async function stopOpt() {
+  if (!confirm('Stop optimization?')) return;
+  await fetch('/api/optimization/stop', {method:'POST'});
+  poll();
+}
+
+async function loadCharts() {
+  try {
+  const r = await fetch('/api/designs?limit=500');
+  const designs = await r.json();
+  if (!Array.isArray(designs) || !designs.length) {
+    document.getElementById('violation-list').innerHTML = '<em>No designs evaluated yet.</em>';
+    return;
+  }
+
+  const iters = designs.map(d => d.iter);
+  const foms = designs.map(d => d.fom ?? 0);
+  const feas = designs.map(d => d.feasible);
+
+  // convergence
+  if (convChart) convChart.destroy();
+  const bestSoFar = [];
+  let bf = -Infinity;
+  for (const f of foms) {
+    if (f > bf) bf = f;
+    bestSoFar.push(bf === -Infinity ? null : bf);
+  }
+  const ctx1 = document.getElementById('conv-chart').getContext('2d');
+  convChart = new Chart(ctx1, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label: 'Feasible', data: designs.filter(d=>d.feasible).map(d=>({x:d.iter, y:d.fom})), backgroundColor:'#44cc88', pointRadius:3 },
+        { label: 'Infeasible', data: designs.filter(d=>!d.feasible).map(d=>({x:d.iter, y:d.fom})), backgroundColor:'rgba(204,68,68,0.3)', pointRadius:2 },
+        { label: 'Best so far', data: iters.map((x,i)=>({x,y:bestSoFar[i]})).filter(p=>p.y!==null), borderColor:'#ffcc00', backgroundColor:'#ffcc00', type:'line', fill:false, pointRadius:0 },
+      ]
+    },
+    options: { scales: { x:{title:{display:true,text:'Iteration'}}, y:{title:{display:true,text:'FoM'}} }, responsive:true }
+  });
+
+  // feasibility ratio (batches of 10)
+  if (feasChart) feasChart.destroy();
+  const batchSize = 10;
+  const ratios = [];
+  for (let i = 0; i < designs.length; i += batchSize) {
+    const batch = designs.slice(i, i + batchSize);
+    const f = batch.filter(d => d.feasible).length;
+    ratios.push(f / batch.length);
+  }
+  const ctx2 = document.getElementById('feas-chart').getContext('2d');
+  feasChart = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: ratios.map((_,i) => `#${i*batchSize}`),
+      datasets: [{ label: 'Feasibility Ratio', data: ratios, backgroundColor: '#4488cc' }]
+    },
+    options: { scales: { y:{min:0,max:1,title:{display:true,text:'Ratio'}} }, responsive:true }
+  });
+
+  // resistance histogram
+  if (rtChart) rtChart.destroy();
+  const rts = designs.filter(d=>d.rt_total).map(d=>d.rt_total);
+  if (rts.length) {
+    const ctx3 = document.getElementById('rt-chart').getContext('2d');
+    const bins = 15;
+    const min = Math.min(...rts), max = Math.max(...rts);
+    const binW = (max - min) / bins || 1;
+    const hist = new Array(bins).fill(0);
+    for (const v of rts) {
+      const idx = Math.min(bins - 1, Math.floor((v - min) / binW));
+      hist[idx]++;
+    }
+    const labels = hist.map((_,i) => (min + i * binW).toFixed(0));
+    rtChart = new Chart(ctx3, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Count', data: hist, backgroundColor: '#44aacc' }] },
+      options: { scales: { x:{title:{display:true,text:'Rt (N)'}}, y:{title:{display:true,text:'Count'}} }, responsive:true }
+    });
+  }
+
+  // violation frequency
+  const vr = await fetch('/api/db-stats');
+  const vs = await vr.json();
+  if (vs.violation_counts) {
+    const vlist = document.getElementById('violation-list');
+    vlist.innerHTML = Object.entries(vs.violation_counts)
+      .sort((a,b) => b[1] - a[1])
+      .map(([k,v]) => `<div class="violation-item"><span class="violation-key">${k}</span><span class="violation-count">${v}</span></div>`)
+      .join('');
+  }
+  } catch(e) {}
+}
+
+<div id="reset-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div id="reset-step-1">
+      <h2 style="color:#cc4444">⚠️ Reset Database</h2>
+      <p>This will permanently <strong>delete all optimization data</strong> (85 designs, calibration history, validation results).</p>
+      <p>The optimization will be stopped if currently running.</p>
+      <p style="margin-top:16px;color:#888">Are you 100% sure?</p>
+      <div class="modal-actions">
+        <button class="btn" onclick="hideReset()">Cancel</button>
+        <button class="btn btn-danger" onclick="showResetStep2()">I understand, continue</button>
+      </div>
+    </div>
+    <div id="reset-step-2" style="display:none">
+      <h2 style="color:#cc4444">🔴 Final Confirmation</h2>
+      <p>Type <strong>yes</strong> in the box below to confirm. Copy-paste is disabled — you must type it manually.</p>
+      <input type="text" id="reset-confirm-input" class="reset-input"
+             placeholder='type "yes" to confirm'
+             autocomplete="off"
+             onpaste="return false"
+             oncopy="return false"
+             oncut="return false"
+             oninput="document.getElementById('reset-confirm-btn').disabled = this.value !== 'yes'">
+      <div class="modal-actions">
+        <button class="btn" onclick="hideReset()">Cancel</button>
+        <button class="btn btn-danger" id="reset-confirm-btn" disabled onclick="executeReset()">Confirm Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+}
+.modal-box h2 { margin: 0 0 12px 0; font-size: 1.2rem; }
+.modal-box p { margin: 6px 0; color: #c9d1d9; line-height: 1.5; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.reset-input {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 12px; margin-top: 12px;
+  background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+  color: #c9d1d9; font-size: 1rem; font-family: monospace;
+  text-align: center; letter-spacing: 2px;
+}
+.reset-input:focus { outline: none; border-color: #4488cc; }
+.btn-reset {
+  background: transparent; color: #cc4444; border: 1px solid #cc4444;
+}
+.btn-reset:hover { background: rgba(204,68,68,0.15); }
+</style>
+
+<script>
+function showResetStep1() { document.getElementById('reset-step-2').style.display = 'none'; document.getElementById('reset-step-1').style.display = ''; document.getElementById('reset-modal').style.display = 'flex'; }
+function showResetStep2() { document.getElementById('reset-step-1').style.display = 'none'; document.getElementById('reset-step-2').style.display = ''; document.getElementById('reset-confirm-input').value = ''; document.getElementById('reset-confirm-btn').disabled = true; document.getElementById('reset-confirm-input').focus(); }
+function hideReset() { document.getElementById('reset-modal').style.display = 'none'; }
+async function executeReset() {
+  const btn = document.getElementById('reset-confirm-btn');
+  btn.disabled = true; btn.textContent = 'Resetting...';
+  try {
+    const r = await fetch('/api/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({confirmation:'yes'}) });
+    if (!r.ok) { const d = await r.json(); alert('Reset failed: ' + (d.detail || 'unknown')); hideReset(); return; }
+    hideReset();
+    poll();
+    loadCharts();
+  } catch(e) { alert('Reset failed: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Confirm Reset';
+}
+</script>
+
+{% endblock %}

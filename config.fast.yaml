@@ -1,0 +1,77 @@
+optimization:
+  n_initial: 20
+  n_iter: 80
+  min_iterations: 10
+  convergence_threshold: 0.005
+  num_restarts: 5
+  raw_samples: 20
+  gp_jitter: 1.0e-6
+
+calibration:
+  frequency: 999  # don't run mid-fi during fast test
+
+validation:
+  fine_cfd_cells: 50000
+  max_accel_g: 30.0
+  max_pressure_pa: 100000.0
+  max_self_right_time_s: 10.0
+  rt_upper_bound_factor: 2.0
+  extreme_wave_H_factor: 4.0
+  drop_height: 3.0
+
+paths:
+  output_dir: ./output
+  database: ./output/optimization.db
+  openfoam_env: /opt/openfoam2512/etc/bashrc
+  dualsphysics_dir: ./bin/dualsphysics/5.4
+
+fixed:
+  LWL: 2.4
+  target_speed_knots: 4.0
+  target_displacement: 0.30
+  gravity: 9.81
+  rho_water: 1025.0
+  nu_water: 1.19e-6
+  electronics_bay: [0.0, 0.0, -0.05]
+  wing_sail_area: 2.0
+  wing_sail_height: 1.5
+
+bounds:
+  # LWL fixed to 2.4 - see fixed section below
+  BWL: [0.40, 0.60]
+  T_canoe: [0.15, 0.35]
+  Cp: [0.55, 0.65]
+  Cm: [0.60, 0.90]
+  LCB: [5.0, 20.0]
+  D_keel: [0.85, 1.20]
+  keel_chord: [0.15, 0.25]
+  bulb_vol: [0.001, 0.05]
+  bulb_pos: [0.30, 0.50]
+  E: [0.15, 0.30]
+  SA: [0.05, 0.25]
+  flare: [5.0, 15.0]
+  deadrise: [5.0, 25.0]
+  bilge_r: [0.05, 0.30]
+  keel_rake: [0.001, 0.02]
+  ballast_frac: [0.30, 0.70]
+
+weights:
+  w1: 1.0
+  w2: 0.5
+  w3: 0.5
+  w4: 2.0
+  stability_normalization: 30.0
+  light_wind_bonus: 0.2
+
+wave_spectrum:
+  type: JONSWAP
+  Hs: 2.5
+  Tp: 9.0
+  gamma: 3.3
+  n_freq: 100
+  n_dir: 24
+  min_wind_speed_kt: 6.0
+
+logging:
+  level: INFO
+  file: ./output/pipeline.log

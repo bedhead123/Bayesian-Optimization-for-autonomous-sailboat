@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Live Logs</h1>
+<div class="toolbar">
+  <label><input type="checkbox" id="auto-scroll" checked> Auto-scroll</label>
+  <select id="log-filter" onchange="filterLogs()">
+    <option value="ALL">All levels</option>
+    <option value="INFO">INFO</option>
+    <option value="WARNING">WARNINGS</option>
+    <option value="ERROR">ERRORS</option>
+  </select>
+  <button class="btn" onclick="clearLogs()">Clear</button>
+</div>
+<pre id="log-viewer" class="log-viewer"><em id="log-loading">Loading logs...</em></pre>
+
+<script>
+const logViewer = document.getElementById('log-viewer');
+const MAX_LINES = 2000;
+
+// Load existing log content first
+async function loadExistingLogs() {
+  try {
+    const r = await fetch('/api/logs');
+    const text = await r.text();
+    if (text) {
+      logViewer.innerHTML = '';
+      for (const line of text.split('\n').filter(l => l.trim())) {
+        addLine(line);
+      }
+    } else {
+      logViewer.innerHTML = '<em>No log data yet. Start optimization to generate logs.</em>';
+    }
+  } catch(e) {
+    logViewer.innerHTML = '<em>Failed to load logs.</em>';
+  }
+}
+
+// Then connect SSE for live streaming
+const es = new EventSource('/api/logs/stream');
+es.onmessage = (event) => {
+  try {
+    const data = JSON.parse(event.data);
+    if (data.line && data.line !== '[stream ended]') {
+      addLine(data.line);
+    }
+  } catch(e) {}
+};
+
+function addLine(line) {
+  const filter = document.getElementById('log-filter').value;
+  if (filter !== 'ALL' && !line.includes(filter)) return;
+
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  if (line.includes('ERROR')) div.classList.add('log-error');
+  else if (line.includes('WARNING')) div.classList.add('log-warning');
+  else if (line.includes('INFO')) div.classList.add('log-info');
+
+  div.textContent = line;
+  logViewer.appendChild(div);
+
+  while (logViewer.children.length > MAX_LINES) {
+    logViewer.removeChild(logViewer.firstChild);
+  }
+
+  if (document.getElementById('auto-scroll').checked) {
+    div.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function filterLogs() {
+  const filter = document.getElementById('log-filter').value;
+  for (const child of logViewer.children) {
+    child.style.display = (filter === 'ALL' || child.textContent.includes(filter)) ? '' : 'none';
+  }
+}
+
+function clearLogs() {
+  logViewer.innerHTML = '';
+}
+
+loadExistingLogs();
+</script>
+{% endblock %}

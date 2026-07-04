@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Configuration</h1>
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="saveConfig()">Save</button>
+  <button class="btn" onclick="loadConfig()">Reload</button>
+  <span id="config-status" class="status-msg"></span>
+</div>
+<textarea id="config-editor" class="config-editor"></textarea>
+
+<script>
+async function loadConfig() {
+  try {
+    const r = await fetch('/api/config');
+    const text = await r.text();
+    document.getElementById('config-editor').value = text;
+  } catch(e) {
+    document.getElementById('config-editor').value = 'Error loading config: ' + e.message;
+  }
+}
+
+async function saveConfig() {
+  const content = document.getElementById('config-editor').value;
+  const r = await fetch('/api/config', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({yaml_content: content}),
+  });
+  const status = document.getElementById('config-status');
+  if (r.ok) {
+    status.textContent = 'Saved';
+    status.className = 'status-msg ok';
+  } else {
+    const err = await r.json();
+    status.textContent = 'Error: ' + (err.detail || 'unknown');
+    status.className = 'status-msg err';
+  }
+  setTimeout(() => status.textContent = '', 3000);
+}
+
+loadConfig();
+</script>
+{% endblock %}

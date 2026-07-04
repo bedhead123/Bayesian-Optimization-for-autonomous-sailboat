@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.output/
+output/
+*.stl
+*.csv
+*.db
+*.log
+*.foam
+*.obj
+.venv/
+.coverage
+:memory:
+bin/dualsphysics/5.4/bin/linux/DualSPHysics5.4_linux64

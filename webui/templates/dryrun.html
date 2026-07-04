@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dry Run</h1>
+<p>Run a quick validation of the pipeline without writing to the database.</p>
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="runDryRun()" id="dryrun-btn">Run Dry Run</button>
+  <span id="dryrun-status"></span>
+</div>
+<pre id="dryrun-output" class="log-viewer">Click "Run Dry Run" to start...</pre>
+
+<script>
+async function runDryRun() {
+  const btn = document.getElementById('dryrun-btn');
+  const output = document.getElementById('dryrun-output');
+  const status = document.getElementById('dryrun-status');
+
+  btn.disabled = true;
+  status.textContent = 'Running...';
+  output.textContent = '';
+
+  try {
+    const r = await fetch('/api/dryrun', { method: 'POST' });
+    const result = await r.json();
+
+    output.textContent = result.stdout || '';
+    if (result.stderr) output.textContent += '\n--- STDERR ---\n' + result.stderr;
+
+    if (result.status === 'ok' && result.returncode === 0) {
+      status.textContent = 'Passed';
+      status.className = 'status-msg ok';
+    } else if (result.status === 'timeout') {
+      status.textContent = 'Timed out (300s)';
+      status.className = 'status-msg err';
+    } else {
+      status.textContent = 'Failed (exit ' + result.returncode + ')';
+      status.className = 'status-msg err';
+    }
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'status-msg err';
+    output.textContent = 'Request failed: ' + e.message;
+  }
+
+  btn.disabled = false;
+}
+</script>
+{% endblock %}

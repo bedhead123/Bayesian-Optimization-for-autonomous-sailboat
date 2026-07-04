@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boat Optimizer</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Boat Optimizer</h2>
+    </div>
+    <nav>
+      <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Dashboard</a>
+      <a href="/hull" class="nav-link {% if request.url.path == '/hull' %}active{% endif %}">3D Hull</a>
+      <a href="/specs" class="nav-link {% if request.url.path == '/specs' %}active{% endif %}">Specs</a>
+      <a href="/config" class="nav-link {% if request.url.path == '/config' %}active{% endif %}">Config</a>
+      <a href="/results" class="nav-link {% if request.url.path == '/results' %}active{% endif %}">Results</a>
+      <a href="/logs" class="nav-link {% if request.url.path == '/logs' %}active{% endif %}">Logs</a>
+      <a href="/dryrun" class="nav-link {% if request.url.path == '/dryrun' %}active{% endif %}">Dry Run</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div id="mini-status" class="mini-status">
+        <span class="status-dot idle" id="status-dot"></span>
+        <span id="status-text">Idle</span>
+      </div>
+    </div>
+  </aside>
+  <main class="content">
+    <div class="global-status" id="global-status">
+      <span class="gs-dot" id="gs-dot"></span>
+      <span class="gs-label" id="gs-status-text">Idle</span>
+      <span class="gs-sep">|</span>
+      Iter: <strong id="gs-iter">-</strong>
+      <span class="gs-sep">|</span>
+      Best FoM: <strong id="gs-fom">-</strong>
+      <span class="gs-sep">|</span>
+      Feas: <strong id="gs-feas">-</strong>/<strong id="gs-total">-</strong>
+      <span class="gs-sep">|</span>
+      Rt: <strong id="gs-rt">-</strong>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    // Poll mini status (sidebar)
+    setInterval(async () => {
+      try {
+        const r = await fetch('/api/optimization/status');
+        const s = await r.json();
+        const dot = document.getElementById('status-dot');
+        const txt = document.getElementById('status-text');
+        if (s.running) {
+          dot.className = 'status-dot running';
+          txt.textContent = `Running (${s.elapsed_s || 0}s)`;
+        } else {
+          dot.className = 'status-dot idle';
+          txt.textContent = 'Idle';
+        }
+      } catch(e) {}
+    }, 2000);
+
+    // Global status bar (all pages)
+    setInterval(async () => {
+      try {
+        const r = await fetch('/api/status');
+        const s = await r.json();
+        const gs = document.getElementById('global-status');
+        const dot = document.getElementById('gs-dot');
+        const stxt = document.getElementById('gs-status-text');
+        if (s.running) {
+          dot.className = 'gs-dot running';
+          stxt.textContent = `Running (${s.elapsed_s || 0}s)`;
+        } else {
+          dot.className = 'gs-dot idle';
+          stxt.textContent = 'Idle';
+        }
+        document.getElementById('gs-iter').textContent = s.current_iter || 0;
+        document.getElementById('gs-fom').textContent = s.best_fom?.toFixed(4) || '-';
+        document.getElementById('gs-feas').textContent = s.feasible || 0;
+        document.getElementById('gs-total').textContent = s.total || 0;
+        document.getElementById('gs-rt').textContent = s.best_rt?.toFixed(1) || '-';
+      } catch(e) {}
+    }, 3000);
+  </script>
+</body>
+</html>
