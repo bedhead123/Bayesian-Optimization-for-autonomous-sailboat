@@ -1,0 +1,1640 @@
+2026-07-01 16:31:46,553 [INFO] hull_opt: ============================================================
+2026-07-01 16:31:46,553 [INFO] hull_opt: Hull-Keel Design Optimization Pipeline
+2026-07-01 16:31:46,553 [INFO] hull_opt: Output directory: /home/anon/apps/boat/output
+2026-07-01 16:31:46,553 [INFO] hull_opt: ============================================================
+2026-07-01 16:31:46,956 [INFO] hull_opt.utils: GPU detected: NVIDIA GeForce RTX 3050, 6.1GB VRAM
+2026-07-01 16:31:46,956 [INFO] hull_opt.surrogate: Starting hull optimization pipeline
+2026-07-01 16:31:46,956 [INFO] hull_opt.utils: Memory throttle: 4 workers requested, 13.5GB free RAM allows 3 (need 3.5GB/worker)
+2026-07-01 16:31:49,259	INFO worker.py:2012 -- Started a local Ray instance.
+/home/anon/miniconda3/lib/python3.13/site-packages/ray/_private/worker.py:2051: FutureWarning: Tip: In future versions of Ray, Ray will no longer override accelerator visible devices env var if num_gpus=0 or num_gpus=None (default). To enable this behavior and turn off this error message, set RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0
+  warnings.warn(
+2026-07-01 16:31:49,581 [INFO] hull_opt.surrogate: Started Ray pool with 3 workers (GPU: True)
+2026-07-01 16:31:49,582 [INFO] hull_opt.surrogate: LHS batch 0: evaluating 20 designs (total 20/40)
+2026-07-01 16:31:49,582 [INFO] hull_opt.utils: Memory throttle: 4 workers requested, 12.9GB free RAM allows 3 (need 3.5GB/worker)
+[36m(_evaluate_one_wrapper pid=65984)[0m Bulb volume capped: requested 0.049685, max possible 0.003189 (keel_chord=0.183)
+[36m(_evaluate_one_wrapper pid=65983)[0m Total mesh volume 1.0820 vs underwater volume 0.2938 ratio=3.683
+[36m(_evaluate_one_wrapper pid=65984)[0m Mesh element quality: 5.0000 (may affect solver)
+[36m(_evaluate_one_wrapper pid=65983)[0m Bulb volume capped: requested 0.043521, max possible 0.002457 (keel_chord=0.167)[32m [repeated 4x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/user-guides/configure-logging.html#log-deduplication for more options.)[0m
+[36m(_evaluate_one_wrapper pid=65983)[0m Total mesh volume 0.4950 vs underwater volume 0.1628 ratio=3.041[32m [repeated 5x across cluster][0m
+[36m(_evaluate_one_wrapper pid=65982)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:33:01] WARNING  Bulb volume capped: requested 0.010153, max possible        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:33:02] WARNING  Total mesh volume 0.7098 vs underwater volume 0.1677        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     ratio=4.233                                                 
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:33:03] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16[32m [repeated 2x across cluster][0m
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:33:03] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:33:14] WARNING  Total mesh volume 0.8752 vs underwater volume 0.3012        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.905                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65984)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:51
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:33:55] WARNING  Bulb volume capped: requested 0.049986, max possible        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     0.008109 (keel_chord=0.249)                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:33:56] WARNING  Total mesh volume 0.8145 vs underwater volume 0.2421        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     ratio=3.365                                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65982)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:34:08] WARNING  Bulb volume capped: requested 0.002332, max possible        
+[36m(_evaluate_one_wrapper pid=65982)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:34:09] WARNING  SAC volume 0.1275 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65982)[0m            WARNING  Total mesh volume 0.6893 vs underwater volume 0.1186        
+[36m(_evaluate_one_wrapper pid=65982)[0m                     ratio=5.813                                                 
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:34:10] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002028 (keel_chord=0.157)                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:53[32m [repeated 2x across cluster][0m
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:34:12] WARNING  Bulb volume capped: requested 0.005635, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:34:13] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:34:52] WARNING  SAC volume 0.1237 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Total mesh volume 0.4871 vs underwater volume 0.1176        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     ratio=4.141                                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Bulb volume capped: requested 0.049870, max possible        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     0.004280 (keel_chord=0.201)                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:34:53] WARNING  Total mesh volume 0.8401 vs underwater volume 0.1627        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     ratio=5.164                                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65982)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:58
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:35:09] WARNING  Bulb volume capped: requested 0.049965, max possible        
+[36m(_evaluate_one_wrapper pid=65982)[0m                     0.001773 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:35:10] WARNING  Total mesh volume 0.5793 vs underwater volume 0.2213        
+[36m(_evaluate_one_wrapper pid=65982)[0m                     ratio=2.617                                                 
+[36m(_evaluate_one_wrapper pid=65982)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:35:37] WARNING  Mesh element quality: 2.9042 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65984)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:58
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:35:53] WARNING  Bulb volume capped: requested 0.049995, max possible        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     0.001876 (keel_chord=0.153)                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:35:54] WARNING  SAC volume 0.1473 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Total mesh volume 0.4561 vs underwater volume 0.1454        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     ratio=3.136                                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  SAC volume 0.1224 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65984)[0m            WARNING  Total mesh volume 0.8950 vs underwater volume 0.1169        
+[36m(_evaluate_one_wrapper pid=65984)[0m                     ratio=7.657                                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m [16:35:55] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65982)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:36:22] WARNING  Bulb volume capped: requested 0.007775, max possible        
+[36m(_evaluate_one_wrapper pid=65982)[0m                     0.001795 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65982)[0m [16:36:23] WARNING  SAC volume 0.0817 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65982)[0m            WARNING  Mesh underwater volume 0.0802 vs target 0.3000 ratio=0.267 -
+[36m(_evaluate_one_wrapper pid=65982)[0m                     possible SAC gaming                                         
+[36m(_evaluate_one_wrapper pid=65982)[0m            WARNING  Total mesh volume 0.3658 vs underwater volume 0.0802        
+[36m(_evaluate_one_wrapper pid=65982)[0m                     ratio=4.563                                                 
+[36m(_evaluate_one_wrapper pid=65984)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:47
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 16:36:49,211 [INFO] hull_opt.surrogate: LHS plateau reached at 20 samples
+2026-07-01 16:36:49,211 [INFO] hull_opt.surrogate: LHS complete: 20 designs evaluated
+2026-07-01 16:36:49,211 [INFO] hull_opt.surrogate: BO iteration 80/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:36:51] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.005522 (keel_chord=0.219)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7737 vs underwater volume 0.3014        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.567                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 16:38:03,088 [INFO] hull_opt.surrogate: Calibration at iteration 80
+2026-07-01 16:38:03,089 [INFO] hull_opt.surrogate: BO iteration 81/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:38:03] WARNING  Bulb volume capped: requested 0.048183, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001901 (keel_chord=0.154)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:38:05] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:19
+2026-07-01 16:39:25,522 [INFO] hull_opt.surrogate: BO iteration 82/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:39:26] WARNING  Bulb volume capped: requested 0.049995, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001936 (keel_chord=0.155)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:39:27] WARNING  Total mesh volume 0.7303 vs underwater volume 0.1656        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.410                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 16:40:29,564 [INFO] hull_opt.surrogate: BO iteration 83/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:40:30] WARNING  Bulb volume capped: requested 0.032362, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008157 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:40:31] WARNING  Total mesh volume 0.7890 vs underwater volume 0.2986        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.642                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:15
+2026-07-01 16:41:48,298 [INFO] hull_opt.surrogate: BO iteration 84/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:41:49] WARNING  Bulb volume capped: requested 0.046537, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.006680 (keel_chord=0.234)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:41:50] WARNING  Total mesh volume 0.9872 vs underwater volume 0.2791        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.536                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.7516 (may affect solver)            
+2026-07-01 16:41:51,039 [INFO] hull_opt.surrogate: BO iteration 85/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:41:52] WARNING  Mesh element quality: 2.8849 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 16:43:07,958 [INFO] hull_opt.surrogate: BO iteration 86/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:43:10] WARNING  Mesh element quality: 2.2010 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 16:44:32,212 [INFO] hull_opt.surrogate: BO iteration 87/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:44:33] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008136 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:44:34] WARNING  Mesh element quality: 4.3954 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 16:45:49,486 [INFO] hull_opt.surrogate: BO iteration 88/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:45:50] WARNING  Bulb volume capped: requested 0.049882, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001851 (keel_chord=0.152)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:45:51] WARNING  Total mesh volume 0.7672 vs underwater volume 0.1510        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=5.080                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:02
+2026-07-01 16:46:54,981 [INFO] hull_opt.surrogate: BO iteration 89/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:46:56] WARNING  Bulb volume capped: requested 0.002303, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002091 (keel_chord=0.159)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:46:57] WARNING  Total mesh volume 0.9416 vs underwater volume 0.2944        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.198                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 16:48:11,932 [INFO] hull_opt.surrogate: BO iteration 90/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:48:13] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001861 (keel_chord=0.153)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:48:14] WARNING  SAC volume 0.1387 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.6511 vs underwater volume 0.1393        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.675                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 16:49:15,393 [INFO] hull_opt.surrogate: BO iteration 91/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:49:16] WARNING  Bulb volume capped: requested 0.046995, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008176 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:49:17] WARNING  Total mesh volume 0.6516 vs underwater volume 0.2598        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.508                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:49:18] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 16:50:18,834 [INFO] hull_opt.surrogate: BO iteration 92/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:50:21] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 16:51:51,730 [INFO] hull_opt.surrogate: BO iteration 93/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:51:52] WARNING  Bulb volume capped: requested 0.021667, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:51:53] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:02
+2026-07-01 16:52:57,368 [INFO] hull_opt.surrogate: BO iteration 94/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:52:59] WARNING  Mesh element quality: 3.6438 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 16:54:06,159 [INFO] hull_opt.surrogate: BO iteration 95/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:54:08] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.6746 vs underwater volume 0.1556        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.335                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:54:09] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 16:55:14,460 [INFO] hull_opt.surrogate: BO iteration 96/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:55:15] WARNING  Bulb volume capped: requested 0.049997, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008136 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:55:16] WARNING  Total mesh volume 0.8288 vs underwater volume 0.2992        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.770                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.7116 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 16:56:27,322 [INFO] hull_opt.surrogate: BO iteration 97/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:56:29] WARNING  Bulb volume capped: requested 0.041812, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.003433 (keel_chord=0.187)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7825 vs underwater volume 0.2934        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.667                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 16:57:39,915 [INFO] hull_opt.surrogate: BO iteration 98/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:57:43] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 16:58:47,609 [INFO] hull_opt.surrogate: BO iteration 99/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:58:51] WARNING  Mesh element quality: 3.3828 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 16:59:53,848 [INFO] hull_opt.surrogate: BO iteration 100/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:59:56] WARNING  SAC volume 0.1455 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8127 vs underwater volume 0.1375        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=5.909                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [16:59:57] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:57
+2026-07-01 17:00:55,417 [INFO] hull_opt.surrogate: Calibration at iteration 100
+2026-07-01 17:00:55,417 [INFO] hull_opt.surrogate: BO iteration 101/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:00:55] WARNING  Bulb volume capped: requested 0.010421, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008179 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:00:57] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 17:02:01,857 [INFO] hull_opt.surrogate: BO iteration 102/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:02:05] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:02
+2026-07-01 17:03:08,411 [INFO] hull_opt.surrogate: BO iteration 103/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:03:11] WARNING  Mesh element quality: 3.1626 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:29
+2026-07-01 17:04:42,155 [INFO] hull_opt.surrogate: BO iteration 104/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:04:44] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:04:45] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:17
+2026-07-01 17:06:03,509 [INFO] hull_opt.surrogate: BO iteration 105/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:06:06] WARNING  Bulb volume capped: requested 0.049210, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:06:07] WARNING  Total mesh volume 1.1992 vs underwater volume 0.3048        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.934                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+2026-07-01 17:06:07,961 [INFO] hull_opt.surrogate: BO iteration 106/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:06:09] WARNING  Bulb volume capped: requested 0.049963, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:06:10] WARNING  Total mesh volume 0.8367 vs underwater volume 0.3062        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.732                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.0228 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 17:07:21,567 [INFO] hull_opt.surrogate: BO iteration 107/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:07:22] WARNING  Bulb volume capped: requested 0.048886, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:07:23] WARNING  Total mesh volume 1.1157 vs underwater volume 0.2761        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.041                                                 
+2026-07-01 17:07:23,864 [INFO] hull_opt.surrogate: BO iteration 108/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.2084 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:07:26] WARNING  Total mesh volume 0.8335 vs underwater volume 0.2560        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.256                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.7066 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 17:08:38,686 [INFO] hull_opt.surrogate: BO iteration 109/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:08:40] WARNING  Bulb volume capped: requested 0.049939, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008140 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.9121 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 17:09:53,652 [INFO] hull_opt.surrogate: BO iteration 110/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:09:54] WARNING  Bulb volume capped: requested 0.049839, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008134 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:09:55] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 17:10:57,596 [INFO] hull_opt.surrogate: BO iteration 111/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:10:59] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:24
+2026-07-01 17:12:24,632 [INFO] hull_opt.surrogate: BO iteration 112/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:12:27] WARNING  Total mesh volume 0.8158 vs underwater volume 0.2273        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.590                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.9504 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:06
+2026-07-01 17:13:35,116 [INFO] hull_opt.surrogate: BO iteration 113/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:13:36] WARNING  Bulb volume capped: requested 0.046014, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:13:37] WARNING  SAC volume 0.1457 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.6445 vs underwater volume 0.1466        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.395                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:13:38] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:51
+2026-07-01 17:14:30,210 [INFO] hull_opt.surrogate: BO iteration 114/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:14:33] WARNING  Total mesh volume 0.7641 vs underwater volume 0.2119        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.606                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 4.1122 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:55
+2026-07-01 17:15:29,819 [INFO] hull_opt.surrogate: BO iteration 115/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:15:31] WARNING  Bulb volume capped: requested 0.028819, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001768 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:15:32] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 17:16:55,476 [INFO] hull_opt.surrogate: BO iteration 116/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:16:57] WARNING  Bulb volume capped: requested 0.049460, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:16:58] WARNING  Mesh element quality: 1.9913 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 17:18:15,709 [INFO] hull_opt.surrogate: BO iteration 117/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:18:18] WARNING  Total mesh volume 0.5581 vs underwater volume 0.1617        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.452                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:56
+2026-07-01 17:19:15,706 [INFO] hull_opt.surrogate: BO iteration 118/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:19:18] WARNING  Total mesh volume 0.8768 vs underwater volume 0.2272        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.859                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.2171 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:06
+2026-07-01 17:20:25,877 [INFO] hull_opt.surrogate: BO iteration 119/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:20:27] WARNING  Bulb volume capped: requested 0.049994, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008080 (keel_chord=0.249)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:20:28] WARNING  Total mesh volume 0.7598 vs underwater volume 0.2926        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.596                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 17:21:40,177 [INFO] hull_opt.surrogate: BO iteration 120/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:21:41] WARNING  Bulb volume capped: requested 0.048995, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:21:42] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 17:22:49,608 [INFO] hull_opt.surrogate: Calibration at iteration 120
+2026-07-01 17:22:49,609 [INFO] hull_opt.surrogate: BO iteration 121/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:22:50] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:22:51] WARNING  Total mesh volume 0.8017 vs underwater volume 0.2773        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.891                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.3091 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:07
+2026-07-01 17:24:00,875 [INFO] hull_opt.surrogate: BO iteration 122/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:24:02] WARNING  Bulb volume capped: requested 0.049872, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008170 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:24:03] WARNING  Total mesh volume 0.6815 vs underwater volume 0.1774        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.842                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:51
+2026-07-01 17:24:55,891 [INFO] hull_opt.surrogate: BO iteration 123/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:24:57] WARNING  Total mesh volume 0.8220 vs underwater volume 0.2917        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.818                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:24:58] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 17:26:12,926 [INFO] hull_opt.surrogate: BO iteration 124/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:26:15] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001768 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7378 vs underwater volume 0.2236        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.299                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:26:16] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 17:27:27,605 [INFO] hull_opt.surrogate: BO iteration 125/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:27:29] WARNING  Bulb volume capped: requested 0.013700, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002784 (keel_chord=0.175)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7743 vs underwater volume 0.2946        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.629                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 17:28:36,472 [INFO] hull_opt.surrogate: BO iteration 126/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:28:38] WARNING  Total mesh volume 0.7665 vs underwater volume 0.2743        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.794                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:28:39] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 17:29:48,372 [INFO] hull_opt.surrogate: BO iteration 127/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:29:50] WARNING  Mesh element quality: 2.7270 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:27
+2026-07-01 17:31:19,365 [INFO] hull_opt.surrogate: BO iteration 128/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:31:22] WARNING  Total mesh volume 0.7739 vs underwater volume 0.2447        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.163                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.7055 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 17:32:35,807 [INFO] hull_opt.surrogate: BO iteration 129/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:32:38] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 17:33:55,931 [INFO] hull_opt.surrogate: BO iteration 130/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:33:58] WARNING  Bulb volume capped: requested 0.049978, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001773 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.3865 vs underwater volume 0.1509        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.562                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:33:59] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:57
+2026-07-01 17:34:58,046 [INFO] hull_opt.surrogate: BO iteration 131/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:34:59] WARNING  Bulb volume capped: requested 0.049982, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008180 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:35:00] WARNING  Total mesh volume 0.8287 vs underwater volume 0.2931        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.827                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.8930 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:07
+2026-07-01 17:36:09,223 [INFO] hull_opt.surrogate: BO iteration 132/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:36:10] WARNING  Bulb volume capped: requested 0.049717, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007932 (keel_chord=0.247)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:36:11] WARNING  Total mesh volume 0.7376 vs underwater volume 0.2883        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.559                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.6143 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 17:37:22,101 [INFO] hull_opt.surrogate: BO iteration 133/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:37:24] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:37:25] WARNING  Total mesh volume 0.7954 vs underwater volume 0.1498        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=5.309                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 17:38:26,359 [INFO] hull_opt.surrogate: BO iteration 134/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:38:28] WARNING  Bulb volume capped: requested 0.049994, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 17:39:29,069 [INFO] hull_opt.surrogate: BO iteration 135/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:39:30] WARNING  Bulb volume capped: requested 0.029254, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:39:31] WARNING  Total mesh volume 1.0330 vs underwater volume 0.2585        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.996                                                 
+2026-07-01 17:39:31,786 [INFO] hull_opt.surrogate: BO iteration 136/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:39:35] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 17:40:41,061 [INFO] hull_opt.surrogate: BO iteration 137/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:40:44] WARNING  Total mesh volume 0.9119 vs underwater volume 0.2559        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.564                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 17:41:54,025 [INFO] hull_opt.surrogate: BO iteration 138/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:41:56] WARNING  SAC volume 0.1120 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7673 vs underwater volume 0.1080        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=7.107                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:48
+2026-07-01 17:42:46,346 [INFO] hull_opt.surrogate: BO iteration 139/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:42:48] WARNING  Bulb volume capped: requested 0.041462, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 17:44:11,086 [INFO] hull_opt.surrogate: BO iteration 140/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:44:13] WARNING  Total mesh volume 0.8748 vs underwater volume 0.2598        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.366                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:44:14] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 17:45:17,059 [INFO] hull_opt.surrogate: Calibration at iteration 140
+2026-07-01 17:45:17,059 [INFO] hull_opt.surrogate: BO iteration 141/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:45:19] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.006935 (keel_chord=0.237)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8556 vs underwater volume 0.3021        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.832                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:45:20] WARNING  Mesh element quality: 2.6038 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 17:46:32,232 [INFO] hull_opt.surrogate: BO iteration 142/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:46:34] WARNING  Bulb volume capped: requested 0.018377, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007993 (keel_chord=0.248)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8738 vs underwater volume 0.3003        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.910                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:46:35] WARNING  Mesh element quality: 2.2041 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:56
+2026-07-01 17:47:33,146 [INFO] hull_opt.surrogate: BO iteration 143/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:47:36] WARNING  Mesh element quality: 3.6985 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 17:48:36,535 [INFO] hull_opt.surrogate: BO iteration 144/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:48:39] WARNING  Mesh element quality: 2.8028 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 17:50:06,508 [INFO] hull_opt.surrogate: BO iteration 145/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:50:09] WARNING  Bulb volume capped: requested 0.015778, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:50:10] WARNING  Total mesh volume 0.7894 vs underwater volume 0.2205        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.580                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.2033 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:55
+2026-07-01 17:51:06,923 [INFO] hull_opt.surrogate: BO iteration 146/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:51:10] WARNING  Total mesh volume 0.7820 vs underwater volume 0.2108        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.711                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.4631 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 17:52:16,092 [INFO] hull_opt.surrogate: BO iteration 147/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:52:19] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 17:53:24,097 [INFO] hull_opt.surrogate: BO iteration 148/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:53:27] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 17:54:32,220 [INFO] hull_opt.surrogate: BO iteration 149/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:54:33] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001774 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:54:34] WARNING  Total mesh volume 0.8282 vs underwater volume 0.3020        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.742                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 17:55:44,378 [INFO] hull_opt.surrogate: BO iteration 150/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:55:46] WARNING  Bulb volume capped: requested 0.048069, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008161 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:55:47] WARNING  Total mesh volume 0.6622 vs underwater volume 0.1792        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.695                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:51
+2026-07-01 17:56:40,232 [INFO] hull_opt.surrogate: BO iteration 151/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:56:43] WARNING  Mesh element quality: 2.7951 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 17:58:05,930 [INFO] hull_opt.surrogate: BO iteration 152/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:58:08] WARNING  Total mesh volume 0.7940 vs underwater volume 0.2975        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.669                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:15
+2026-07-01 17:59:25,450 [INFO] hull_opt.surrogate: BO iteration 153/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:59:30] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001792 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [17:59:31] WARNING  Total mesh volume 0.8505 vs underwater volume 0.2901        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.932                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 18:00:40,821 [INFO] hull_opt.surrogate: BO iteration 154/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:00:44] WARNING  SAC volume 0.1131 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7355 vs underwater volume 0.1057        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=6.961                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:50
+2026-07-01 18:01:36,571 [INFO] hull_opt.surrogate: BO iteration 155/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:01:40] WARNING  Bulb volume capped: requested 0.042004, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002975 (keel_chord=0.178)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:01:41] WARNING  Total mesh volume 0.9081 vs underwater volume 0.3020        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.007                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 18:02:57,126 [INFO] hull_opt.surrogate: BO iteration 156/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:02:59] WARNING  Bulb volume capped: requested 0.049994, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:03:00] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 18:04:04,533 [INFO] hull_opt.surrogate: BO iteration 157/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:04:08] WARNING  Total mesh volume 0.8911 vs underwater volume 0.2931        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.041                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:04:09] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 18:05:23,046 [INFO] hull_opt.surrogate: BO iteration 158/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:05:28] WARNING  SAC volume 0.0813 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh underwater volume 0.0819 vs target 0.3000 ratio=0.273 -
+[36m(_evaluate_one_wrapper pid=65983)[0m                     possible SAC gaming                                         
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.5911 vs underwater volume 0.0819        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=7.218                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:46
+2026-07-01 18:06:16,404 [INFO] hull_opt.surrogate: BO iteration 159/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:06:20] WARNING  Mesh element quality: 2.7191 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 18:07:44,868 [INFO] hull_opt.surrogate: BO iteration 160/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:07:48] WARNING  Total mesh volume 0.7113 vs underwater volume 0.1729        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.115                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:53
+2026-07-01 18:08:43,186 [INFO] hull_opt.surrogate: Calibration at iteration 160
+2026-07-01 18:08:43,186 [INFO] hull_opt.surrogate: BO iteration 161/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:08:46] WARNING  Total mesh volume 0.7854 vs underwater volume 0.1685        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.662                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:08:47] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 18:09:49,995 [INFO] hull_opt.surrogate: BO iteration 162/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:09:53] WARNING  Total mesh volume 0.7747 vs underwater volume 0.3037        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.551                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 18:10:54,223 [INFO] hull_opt.surrogate: BO iteration 163/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:10:57] WARNING  Total mesh volume 0.7239 vs underwater volume 0.2394        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.024                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:10:58] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 18:12:07,816 [INFO] hull_opt.surrogate: BO iteration 164/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:12:10] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008180 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:12:11] WARNING  Total mesh volume 0.8435 vs underwater volume 0.2958        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.851                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:57
+2026-07-01 18:13:09,544 [INFO] hull_opt.surrogate: BO iteration 165/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:13:12] WARNING  Total mesh volume 1.1675 vs underwater volume 0.3031        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.851                                                 
+2026-07-01 18:13:12,578 [INFO] hull_opt.surrogate: BO iteration 166/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:13:15] WARNING  Total mesh volume 1.0223 vs underwater volume 0.3015        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.390                                                 
+2026-07-01 18:13:15,543 [INFO] hull_opt.surrogate: BO iteration 167/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:13:17] WARNING  Bulb volume capped: requested 0.049907, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007683 (keel_chord=0.245)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:13:18] WARNING  Total mesh volume 0.8765 vs underwater volume 0.2973        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.948                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.4222 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 18:14:33,047 [INFO] hull_opt.surrogate: BO iteration 168/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:14:35] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002997 (keel_chord=0.179)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:15
+2026-07-01 18:15:52,724 [INFO] hull_opt.surrogate: BO iteration 169/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:15:54] WARNING  Bulb volume capped: requested 0.017974, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008063 (keel_chord=0.249)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:15:55] WARNING  Total mesh volume 0.7474 vs underwater volume 0.1696        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.406                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:15:56] WARNING  Mesh element quality: 2.5429 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 18:16:57,168 [INFO] hull_opt.surrogate: BO iteration 170/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:17:00] WARNING  Total mesh volume 0.9108 vs underwater volume 0.2812        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.238                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.4695 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 18:18:12,329 [INFO] hull_opt.surrogate: BO iteration 171/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:18:16] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 18:19:19,427 [INFO] hull_opt.surrogate: BO iteration 172/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:19:23] WARNING  Total mesh volume 0.8823 vs underwater volume 0.2728        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.234                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.1289 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 18:20:39,416 [INFO] hull_opt.surrogate: BO iteration 173/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:20:43] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001768 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:20:44] WARNING  Total mesh volume 0.7631 vs underwater volume 0.2924        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.610                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 18:21:57,290 [INFO] hull_opt.surrogate: BO iteration 174/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:21:59] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001874 (keel_chord=0.153)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:22:00] WARNING  Total mesh volume 0.8276 vs underwater volume 0.2965        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.791                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 18:23:11,656 [INFO] hull_opt.surrogate: BO iteration 175/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:23:13] WARNING  Bulb volume capped: requested 0.010757, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007294 (keel_chord=0.241)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:23:14] WARNING  Mesh element quality: 3.0402 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 18:24:25,768 [INFO] hull_opt.surrogate: BO iteration 176/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:24:28] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002699 (keel_chord=0.173)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:24:29] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 18:25:34,638 [INFO] hull_opt.surrogate: BO iteration 177/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:25:36] WARNING  Bulb volume capped: requested 0.049699, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008133 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:25:37] WARNING  Total mesh volume 0.7135 vs underwater volume 0.2546        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.803                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:25:38] WARNING  Mesh element quality: 3.3790 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 18:26:59,284 [INFO] hull_opt.surrogate: BO iteration 178/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:27:01] WARNING  Bulb volume capped: requested 0.034310, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002769 (keel_chord=0.174)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8628 vs underwater volume 0.2920        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.955                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:27:02] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 18:28:12,215 [INFO] hull_opt.surrogate: BO iteration 179/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:28:19] WARNING  Total mesh volume 0.9277 vs underwater volume 0.2931        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.165                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 18:29:35,839 [INFO] hull_opt.surrogate: BO iteration 180/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:29:39] WARNING  Bulb volume capped: requested 0.049898, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001774 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7703 vs underwater volume 0.1947        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.957                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:29:40] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 18:30:45,854 [INFO] hull_opt.surrogate: Calibration at iteration 180
+2026-07-01 18:30:45,854 [INFO] hull_opt.surrogate: BO iteration 181/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:30:50] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 18:31:57,439 [INFO] hull_opt.surrogate: BO iteration 182/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:31:59] WARNING  Total mesh volume 0.8062 vs underwater volume 0.2910        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.771                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:32:00] WARNING  Mesh element quality: 1.7817 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:07
+2026-07-01 18:33:08,807 [INFO] hull_opt.surrogate: BO iteration 183/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:33:11] WARNING  Bulb volume capped: requested 0.037289, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008170 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:33:12] WARNING  Total mesh volume 0.6396 vs underwater volume 0.1611        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.971                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:53
+2026-07-01 18:34:07,246 [INFO] hull_opt.surrogate: BO iteration 184/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:34:10] WARNING  Bulb volume capped: requested 0.049986, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008167 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7836 vs underwater volume 0.2936        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.668                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 18:35:23,511 [INFO] hull_opt.surrogate: BO iteration 185/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:35:27] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 1.0663 vs underwater volume 0.3138        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.398                                                 
+2026-07-01 18:35:27,949 [INFO] hull_opt.surrogate: BO iteration 186/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.4848 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:35:35] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001786 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:35:36] WARNING  Total mesh volume 0.7395 vs underwater volume 0.2942        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.513                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 18:36:50,855 [INFO] hull_opt.surrogate: BO iteration 187/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:36:55] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.003123 (keel_chord=0.181)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:36:56] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:18
+2026-07-01 18:38:15,560 [INFO] hull_opt.surrogate: BO iteration 188/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:38:19] WARNING  Bulb volume capped: requested 0.049020, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:38:20] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:25
+2026-07-01 18:39:47,196 [INFO] hull_opt.surrogate: BO iteration 189/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:39:50] WARNING  Mesh element quality: 4.0150 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 18:40:54,929 [INFO] hull_opt.surrogate: BO iteration 190/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:40:58] WARNING  Total mesh volume 0.8027 vs underwater volume 0.2384        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.367                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:40:59] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 18:42:05,992 [INFO] hull_opt.surrogate: BO iteration 191/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:42:08] WARNING  Mesh element quality: 2.9160 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:31
+2026-07-01 18:43:41,043 [INFO] hull_opt.surrogate: BO iteration 192/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:43:44] WARNING  Bulb volume capped: requested 0.049847, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007669 (keel_chord=0.245)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 18:45:08,843 [INFO] hull_opt.surrogate: BO iteration 193/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:45:11] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008138 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:45:12] WARNING  Total mesh volume 0.7963 vs underwater volume 0.2970        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.681                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 18:46:18,086 [INFO] hull_opt.surrogate: BO iteration 194/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:46:21] WARNING  Bulb volume capped: requested 0.046118, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001952 (keel_chord=0.155)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:46:22] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:30
+2026-07-01 18:47:53,777 [INFO] hull_opt.surrogate: BO iteration 195/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:47:57] WARNING  Bulb volume capped: requested 0.049995, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001872 (keel_chord=0.153)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:47:58] WARNING  Total mesh volume 0.8404 vs underwater volume 0.2891        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.907                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 18:49:10,424 [INFO] hull_opt.surrogate: BO iteration 196/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:49:14] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008150 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7533 vs underwater volume 0.2973        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.534                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:49:15] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 18:50:29,747 [INFO] hull_opt.surrogate: BO iteration 197/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:50:33] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008113 (keel_chord=0.249)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:50:34] WARNING  Total mesh volume 0.8177 vs underwater volume 0.2994        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.732                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.9166 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 18:51:50,116 [INFO] hull_opt.surrogate: BO iteration 198/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:51:54] WARNING  Bulb volume capped: requested 0.049913, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:51:55] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 18:53:22,841 [INFO] hull_opt.surrogate: BO iteration 199/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:53:27] WARNING  Bulb volume capped: requested 0.049996, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8306 vs underwater volume 0.3045        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.728                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:53:28] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 18:54:40,246 [INFO] hull_opt.surrogate: BO iteration 200/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:54:45] WARNING  Bulb volume capped: requested 0.049809, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:54:46] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 18:56:10,321 [INFO] hull_opt.surrogate: Calibration at iteration 200
+2026-07-01 18:56:10,321 [INFO] hull_opt.surrogate: BO iteration 201/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:56:14] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008111 (keel_chord=0.249)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:56:15] WARNING  Mesh element quality: 2.8555 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:19
+2026-07-01 18:57:36,324 [INFO] hull_opt.surrogate: BO iteration 202/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:57:39] WARNING  Bulb volume capped: requested 0.049945, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:57:40] WARNING  Mesh element quality: 2.6477 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 18:59:04,793 [INFO] hull_opt.surrogate: BO iteration 203/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [18:59:09] WARNING  Total mesh volume 0.7963 vs underwater volume 0.3099        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.570                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 19:00:11,383 [INFO] hull_opt.surrogate: BO iteration 204/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:00:13] WARNING  Total mesh volume 0.9956 vs underwater volume 0.2924        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.405                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:00:14] WARNING  Mesh element quality: 2.4763 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:58
+2026-07-01 19:01:14,278 [INFO] hull_opt.surrogate: BO iteration 205/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:01:16] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002209 (keel_chord=0.162)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:01:17] WARNING  Total mesh volume 0.8854 vs underwater volume 0.3058        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.895                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 19:02:28,945 [INFO] hull_opt.surrogate: BO iteration 206/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:02:32] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001792 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:02:33] WARNING  Total mesh volume 0.8151 vs underwater volume 0.3066        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.659                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 19:03:45,776 [INFO] hull_opt.surrogate: BO iteration 207/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:03:49] WARNING  Mesh element quality: 3.3019 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:06
+2026-07-01 19:04:57,202 [INFO] hull_opt.surrogate: BO iteration 208/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:05:02] WARNING  Total mesh volume 0.9488 vs underwater volume 0.2985        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.178                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:05:03] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:57
+2026-07-01 19:06:01,694 [INFO] hull_opt.surrogate: BO iteration 209/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:06:06] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:24
+2026-07-01 19:07:32,129 [INFO] hull_opt.surrogate: BO iteration 210/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:07:36] WARNING  Mesh element quality: 2.0688 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 19:08:58,705 [INFO] hull_opt.surrogate: BO iteration 211/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:09:03] WARNING  Mesh element quality: 2.0513 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 19:10:28,603 [INFO] hull_opt.surrogate: BO iteration 212/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:10:32] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7470 vs underwater volume 0.2949        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.533                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:10:33] WARNING  Mesh element quality: 1.5878 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 19:11:44,000 [INFO] hull_opt.surrogate: BO iteration 213/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:11:48] WARNING  Mesh element quality: 3.0961 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 19:12:58,839 [INFO] hull_opt.surrogate: BO iteration 214/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:13:02] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 19:14:25,440 [INFO] hull_opt.surrogate: BO iteration 215/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:14:30] WARNING  Bulb volume capped: requested 0.049646, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:17
+2026-07-01 19:15:49,000 [INFO] hull_opt.surrogate: BO iteration 216/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:15:52] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:15:53] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 19:16:56,396 [INFO] hull_opt.surrogate: BO iteration 217/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:16:59] WARNING  Mesh element quality: 3.6479 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 19:18:05,550 [INFO] hull_opt.surrogate: BO iteration 218/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:18:08] WARNING  Total mesh volume 0.8847 vs underwater volume 0.2868        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.085                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.3742 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 19:19:22,892 [INFO] hull_opt.surrogate: BO iteration 219/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:19:26] WARNING  Mesh element quality: 2.6228 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:24
+2026-07-01 19:20:52,472 [INFO] hull_opt.surrogate: BO iteration 220/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:20:55] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001774 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:20:56] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 19:21:59,304 [INFO] hull_opt.surrogate: Calibration at iteration 220
+2026-07-01 19:21:59,304 [INFO] hull_opt.surrogate: BO iteration 221/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:22:05] WARNING  Total mesh volume 0.7832 vs underwater volume 0.3019        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.594                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.1678 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 19:23:18,415 [INFO] hull_opt.surrogate: BO iteration 222/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:23:23] WARNING  Mesh element quality: 2.5118 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:19
+2026-07-01 19:24:43,943 [INFO] hull_opt.surrogate: BO iteration 223/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:24:48] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008172 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:24:49] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 19:25:52,113 [INFO] hull_opt.surrogate: BO iteration 224/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:25:56] WARNING  SAC volume 0.1069 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7297 vs underwater volume 0.1011        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=7.220                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:25:57] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:47
+2026-07-01 19:26:46,068 [INFO] hull_opt.surrogate: BO iteration 225/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:26:50] WARNING  Bulb volume capped: requested 0.049997, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:26:51] WARNING  Total mesh volume 0.7506 vs underwater volume 0.2971        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.526                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 19:28:05,203 [INFO] hull_opt.surrogate: BO iteration 226/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:28:09] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:28:10] WARNING  Total mesh volume 0.9197 vs underwater volume 0.2983        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.083                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:56
+2026-07-01 19:29:07,605 [INFO] hull_opt.surrogate: BO iteration 227/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:29:12] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:30
+2026-07-01 19:30:43,573 [INFO] hull_opt.surrogate: BO iteration 228/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:30:46] WARNING  Bulb volume capped: requested 0.049568, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002250 (keel_chord=0.163)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:30:47] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 19:32:10,292 [INFO] hull_opt.surrogate: BO iteration 229/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:32:14] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002143 (keel_chord=0.160)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:32:15] WARNING  Total mesh volume 0.7941 vs underwater volume 0.3042        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.610                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 19:33:27,776 [INFO] hull_opt.surrogate: BO iteration 230/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:33:31] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 19:34:59,007 [INFO] hull_opt.surrogate: BO iteration 231/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:35:02] WARNING  Bulb volume capped: requested 0.049946, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7435 vs underwater volume 0.2894        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.569                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.6298 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 19:36:15,715 [INFO] hull_opt.surrogate: BO iteration 232/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:36:22] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:31
+2026-07-01 19:37:55,983 [INFO] hull_opt.surrogate: BO iteration 233/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:38:00] WARNING  Bulb volume capped: requested 0.049307, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:38:01] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 19:39:04,200 [INFO] hull_opt.surrogate: BO iteration 234/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:39:09] WARNING  Mesh element quality: 2.8389 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:29
+2026-07-01 19:40:39,760 [INFO] hull_opt.surrogate: BO iteration 235/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:40:44] WARNING  Total mesh volume 0.8412 vs underwater volume 0.2948        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.853                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.1287 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 19:41:59,460 [INFO] hull_opt.surrogate: BO iteration 236/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:42:03] WARNING  Mesh element quality: 2.9187 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 19:43:26,929 [INFO] hull_opt.surrogate: BO iteration 237/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:43:30] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.006777 (keel_chord=0.235)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:43:31] WARNING  Mesh element quality: 3.6472 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:29
+2026-07-01 19:45:01,362 [INFO] hull_opt.surrogate: BO iteration 238/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:45:04] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:45:05] WARNING  Mesh element quality: 2.9211 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 19:46:29,541 [INFO] hull_opt.surrogate: BO iteration 239/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:46:32] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.003199 (keel_chord=0.183)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:46:33] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 19:47:54,786 [INFO] hull_opt.surrogate: BO iteration 240/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:47:57] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 19:49:09,112 [INFO] hull_opt.surrogate: Calibration at iteration 240
+2026-07-01 19:49:09,113 [INFO] hull_opt.surrogate: BO iteration 241/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:49:12] WARNING  Total mesh volume 0.8196 vs underwater volume 0.2945        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.783                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.6396 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 19:50:14,944 [INFO] hull_opt.surrogate: BO iteration 242/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:50:18] WARNING  Bulb volume capped: requested 0.049987, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:25
+2026-07-01 19:51:44,954 [INFO] hull_opt.surrogate: BO iteration 243/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:51:48] WARNING  Total mesh volume 0.8255 vs underwater volume 0.2447        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.374                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:07
+2026-07-01 19:52:57,148 [INFO] hull_opt.surrogate: BO iteration 244/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:53:01] WARNING  Bulb volume capped: requested 0.014076, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8530 vs underwater volume 0.2978        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.864                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:57
+2026-07-01 19:54:00,211 [INFO] hull_opt.surrogate: BO iteration 245/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:54:02] WARNING  Bulb volume capped: requested 0.041383, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:54:03] WARNING  Mesh element quality: 3.1377 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 19:55:04,076 [INFO] hull_opt.surrogate: BO iteration 246/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:55:07] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 19:56:21,848 [INFO] hull_opt.surrogate: BO iteration 247/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:56:28] WARNING  Mesh element quality: 3.2063 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:29
+2026-07-01 19:57:58,184 [INFO] hull_opt.surrogate: BO iteration 248/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:58:04] WARNING  Total mesh volume 0.9017 vs underwater volume 0.2910        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.098                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.4146 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 19:59:18,322 [INFO] hull_opt.surrogate: BO iteration 249/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:59:22] WARNING  Bulb volume capped: requested 0.049992, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008083 (keel_chord=0.249)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [19:59:23] WARNING  Mesh element quality: 2.9213 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 20:00:46,730 [INFO] hull_opt.surrogate: BO iteration 250/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:00:50] WARNING  Bulb volume capped: requested 0.023437, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:00:51] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 20:02:09,346 [INFO] hull_opt.surrogate: BO iteration 251/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:02:12] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001768 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:02:13] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 20:03:37,051 [INFO] hull_opt.surrogate: BO iteration 252/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:03:41] WARNING  Mesh element quality: 2.8832 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 20:05:11,141 [INFO] hull_opt.surrogate: BO iteration 253/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:05:17] WARNING  Mesh element quality: 3.8619 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 20:06:30,807 [INFO] hull_opt.surrogate: BO iteration 254/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:06:36] WARNING  Bulb volume capped: requested 0.031320, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001768 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8429 vs underwater volume 0.3008        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.802                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:06:37] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 20:07:52,890 [INFO] hull_opt.surrogate: BO iteration 255/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:07:58] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 20:09:03,086 [INFO] hull_opt.surrogate: BO iteration 256/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:09:05] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008180 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:09:06] WARNING  Total mesh volume 0.8252 vs underwater volume 0.2984        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.766                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.9355 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 20:10:17,719 [INFO] hull_opt.surrogate: BO iteration 257/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:10:22] WARNING  Mesh element quality: 3.0187 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 20:11:43,492 [INFO] hull_opt.surrogate: BO iteration 258/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:11:48] WARNING  Bulb volume capped: requested 0.028006, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 20:13:06,970 [INFO] hull_opt.surrogate: BO iteration 259/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:13:11] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8331 vs underwater volume 0.3031        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.748                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.6940 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 20:14:21,888 [INFO] hull_opt.surrogate: BO iteration 260/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:14:24] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:14:25] WARNING  SAC volume 0.1304 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.6793 vs underwater volume 0.1294        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=5.251                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 20:15:28,229 [INFO] hull_opt.surrogate: Calibration at iteration 260
+2026-07-01 20:15:28,229 [INFO] hull_opt.surrogate: BO iteration 261/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:15:33] WARNING  Mesh element quality: 2.5048 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 20:16:58,081 [INFO] hull_opt.surrogate: BO iteration 262/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:17:02] WARNING  Mesh element quality: 2.8948 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 20:18:26,918 [INFO] hull_opt.surrogate: BO iteration 263/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:18:30] WARNING  Bulb volume capped: requested 0.009864, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:18:31] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 20:19:33,291 [INFO] hull_opt.surrogate: BO iteration 264/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:19:40] WARNING  Bulb volume capped: requested 0.003031, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001816 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:19:41] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 20:21:02,430 [INFO] hull_opt.surrogate: BO iteration 265/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:21:07] WARNING  Bulb volume capped: requested 0.014451, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.003138 (keel_chord=0.182)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 20:22:37,319 [INFO] hull_opt.surrogate: BO iteration 266/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:22:43] WARNING  Bulb volume capped: requested 0.047978, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:22:44] WARNING  Mesh element quality: 1.7705 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:11
+2026-07-01 20:23:56,511 [INFO] hull_opt.surrogate: BO iteration 267/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:23:59] WARNING  Total mesh volume 0.9020 vs underwater volume 0.2865        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.149                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:24:00] WARNING  Mesh element quality: 4.1332 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:56
+2026-07-01 20:24:57,706 [INFO] hull_opt.surrogate: BO iteration 268/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:25:01] WARNING  Mesh element quality: 2.4073 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 20:26:25,774 [INFO] hull_opt.surrogate: BO iteration 269/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:26:31] WARNING  SAC volume 0.1093 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.6371 vs underwater volume 0.1061        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=6.005                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:26:32] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:53
+2026-07-01 20:27:26,667 [INFO] hull_opt.surrogate: BO iteration 270/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:27:30] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:27:31] WARNING  Total mesh volume 0.8089 vs underwater volume 0.2935        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.756                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.9505 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 20:28:46,495 [INFO] hull_opt.surrogate: BO iteration 271/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:28:52] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.006405 (keel_chord=0.230)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:28:53] WARNING  Mesh element quality: 2.8255 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 20:30:10,557 [INFO] hull_opt.surrogate: BO iteration 272/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:30:15] WARNING  Total mesh volume 0.8536 vs underwater volume 0.2458        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.472                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:30:16] WARNING  Mesh element quality: 2.0837 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 20:31:22,623 [INFO] hull_opt.surrogate: BO iteration 273/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:31:26] WARNING  Mesh element quality: 2.7184 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 20:32:56,214 [INFO] hull_opt.surrogate: BO iteration 274/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:33:00] WARNING  Mesh element quality: 3.0351 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 20:34:12,060 [INFO] hull_opt.surrogate: BO iteration 275/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:34:16] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 20:35:39,683 [INFO] hull_opt.surrogate: BO iteration 276/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:35:43] WARNING  Bulb volume capped: requested 0.021594, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:35:44] WARNING  Mesh element quality: 3.3514 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 20:37:12,089 [INFO] hull_opt.surrogate: BO iteration 277/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:37:16] WARNING  Total mesh volume 0.7341 vs underwater volume 0.2471        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.970                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:37:17] WARNING  Mesh element quality: 2.9478 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:56
+2026-07-01 20:38:14,700 [INFO] hull_opt.surrogate: BO iteration 278/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:38:18] WARNING  Mesh element quality: 3.3445 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 20:39:42,324 [INFO] hull_opt.surrogate: BO iteration 279/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:39:46] WARNING  SAC volume 0.1215 far from target 0.3000                    
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.5191 vs underwater volume 0.1199        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.330                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:54
+2026-07-01 20:40:42,151 [INFO] hull_opt.surrogate: BO iteration 280/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:40:45] WARNING  Bulb volume capped: requested 0.049971, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8841 vs underwater volume 0.2937        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.011                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:40:46] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:13
+2026-07-01 20:42:00,690 [INFO] hull_opt.surrogate: Calibration at iteration 280
+2026-07-01 20:42:00,690 [INFO] hull_opt.surrogate: BO iteration 281/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:42:04] WARNING  Bulb volume capped: requested 0.021220, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:42:05] WARNING  Total mesh volume 0.8660 vs underwater volume 0.2926        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.959                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.3183 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 20:43:14,509 [INFO] hull_opt.surrogate: BO iteration 282/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:43:19] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 20:44:48,590 [INFO] hull_opt.surrogate: BO iteration 283/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:44:52] WARNING  Bulb volume capped: requested 0.044028, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.7197 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 20:46:22,427 [INFO] hull_opt.surrogate: BO iteration 284/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:46:28] WARNING  Total mesh volume 0.8452 vs underwater volume 0.1867        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.527                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.3256 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:52
+2026-07-01 20:47:22,050 [INFO] hull_opt.surrogate: BO iteration 285/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:47:26] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:47:27] WARNING  Total mesh volume 0.8391 vs underwater volume 0.3015        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.784                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.7914 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 20:48:38,276 [INFO] hull_opt.surrogate: BO iteration 286/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:48:43] WARNING  Total mesh volume 0.7961 vs underwater volume 0.1916        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.154                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.6104 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 20:49:48,150 [INFO] hull_opt.surrogate: BO iteration 287/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:49:51] WARNING  Bulb volume capped: requested 0.049661, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:49:52] WARNING  Total mesh volume 0.9458 vs underwater volume 0.2908        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.253                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.9295 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:54
+2026-07-01 20:50:48,323 [INFO] hull_opt.surrogate: BO iteration 288/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:50:53] WARNING  Mesh element quality: 3.6210 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 20:51:56,139 [INFO] hull_opt.surrogate: BO iteration 289/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:52:01] WARNING  Mesh element quality: 2.8182 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:28
+2026-07-01 20:53:30,598 [INFO] hull_opt.surrogate: BO iteration 290/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:53:33] WARNING  Bulb volume capped: requested 0.048797, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:53:34] WARNING  Total mesh volume 0.7402 vs underwater volume 0.2930        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.526                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.0518 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 20:54:45,191 [INFO] hull_opt.surrogate: BO iteration 291/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:54:49] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:54:50] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 20:56:15,027 [INFO] hull_opt.surrogate: BO iteration 292/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:56:18] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 20:57:23,270 [INFO] hull_opt.surrogate: BO iteration 293/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:57:28] WARNING  Bulb volume capped: requested 0.049630, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008177 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 3.1663 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 20:58:57,010 [INFO] hull_opt.surrogate: BO iteration 294/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:59:00] WARNING  Bulb volume capped: requested 0.049589, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:59:01] WARNING  Total mesh volume 1.2569 vs underwater volume 0.2972        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.229                                                 
+2026-07-01 20:59:01,717 [INFO] hull_opt.surrogate: BO iteration 295/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:59:07] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.004719 (keel_chord=0.208)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [20:59:08] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:19
+2026-07-01 21:00:28,757 [INFO] hull_opt.surrogate: BO iteration 296/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:00:34] WARNING  Total mesh volume 0.9633 vs underwater volume 0.2958        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.257                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.3698 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:55
+2026-07-01 21:01:30,749 [INFO] hull_opt.surrogate: BO iteration 297/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:01:35] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001773 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:01:36] WARNING  Total mesh volume 0.6666 vs underwater volume 0.2616        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.548                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:58
+2026-07-01 21:02:35,754 [INFO] hull_opt.surrogate: BO iteration 298/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:02:41] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 21:03:43,091 [INFO] hull_opt.surrogate: BO iteration 299/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:03:45] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008180 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8365 vs underwater volume 0.2907        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.878                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:03:46] WARNING  Mesh element quality: 3.9413 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 21:04:47,998 [INFO] hull_opt.surrogate: BO iteration 300/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:04:54] WARNING  Bulb volume capped: requested 0.048892, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.004159 (keel_chord=0.200)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:04:55] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 21:06:18,615 [INFO] hull_opt.surrogate: Calibration at iteration 300
+2026-07-01 21:06:18,615 [INFO] hull_opt.surrogate: BO iteration 301/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:06:27] WARNING  Total mesh volume 0.8530 vs underwater volume 0.1968        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.334                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:06:28] WARNING  Mesh element quality: 2.3289 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:53
+2026-07-01 21:07:23,037 [INFO] hull_opt.surrogate: BO iteration 302/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:07:27] WARNING  Bulb volume capped: requested 0.049547, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.9288 vs underwater volume 0.2874        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.232                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:07:28] WARNING  Mesh element quality: 1.9377 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:54
+2026-07-01 21:08:23,882 [INFO] hull_opt.surrogate: BO iteration 303/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:08:27] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007616 (keel_chord=0.244)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7905 vs underwater volume 0.2979        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.654                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:08:28] WARNING  Mesh element quality: 2.6652 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 21:09:32,328 [INFO] hull_opt.surrogate: BO iteration 304/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:09:40] WARNING  Total mesh volume 1.0086 vs underwater volume 0.2919        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.456                                                 
+2026-07-01 21:09:40,485 [INFO] hull_opt.surrogate: BO iteration 305/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:09:44] WARNING  Mesh element quality: 3.2179 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 21:11:07,606 [INFO] hull_opt.surrogate: BO iteration 306/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:11:11] WARNING  Mesh element quality: 3.1488 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:15
+2026-07-01 21:12:28,604 [INFO] hull_opt.surrogate: BO iteration 307/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:12:30] WARNING  Bulb volume capped: requested 0.003190, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:12:31] WARNING  Total mesh volume 0.9396 vs underwater volume 0.2873        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.270                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:12:32] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 21:13:45,789 [INFO] hull_opt.surrogate: BO iteration 308/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:13:48] WARNING  Bulb volume capped: requested 0.049984, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001857 (keel_chord=0.152)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:13:49] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 21:15:11,629 [INFO] hull_opt.surrogate: BO iteration 309/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:15:14] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 21:16:16,792 [INFO] hull_opt.surrogate: BO iteration 310/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:16:19] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 21:17:21,291 [INFO] hull_opt.surrogate: BO iteration 311/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:17:24] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:17:25] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:17
+2026-07-01 21:18:44,084 [INFO] hull_opt.surrogate: BO iteration 312/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:18:46] WARNING  Total mesh volume 0.8743 vs underwater volume 0.2922        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.992                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:18:47] WARNING  Mesh element quality: 2.1848 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 21:20:01,007 [INFO] hull_opt.surrogate: BO iteration 313/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:20:05] WARNING  Bulb volume capped: requested 0.049995, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:20:06] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:27
+2026-07-01 21:21:34,288 [INFO] hull_opt.surrogate: BO iteration 314/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:21:37] WARNING  Bulb volume capped: requested 0.043639, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008178 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:21:38] WARNING  Mesh element quality: 3.8161 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:27
+2026-07-01 21:23:07,439 [INFO] hull_opt.surrogate: BO iteration 315/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:23:10] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008180 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7541 vs underwater volume 0.2945        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.561                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:23:11] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 21:24:22,080 [INFO] hull_opt.surrogate: BO iteration 316/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:24:25] WARNING  Bulb volume capped: requested 0.001814, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:24:26] WARNING  Total mesh volume 0.8751 vs underwater volume 0.2593        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.375                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 21:25:40,045 [INFO] hull_opt.surrogate: BO iteration 317/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:25:43] WARNING  Bulb volume capped: requested 0.042590, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:25:44] WARNING  Mesh element quality: 1.8729 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 21:27:01,633 [INFO] hull_opt.surrogate: BO iteration 318/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:27:03] WARNING  Bulb volume capped: requested 0.047057, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.003833 (keel_chord=0.194)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:27:04] WARNING  Total mesh volume 0.8716 vs underwater volume 0.3002        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.903                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:57
+2026-07-01 21:28:02,645 [INFO] hull_opt.surrogate: BO iteration 319/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:28:06] WARNING  Bulb volume capped: requested 0.049992, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.9812 vs underwater volume 0.2958        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.317                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:28:07] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:54
+2026-07-01 21:29:02,982 [INFO] hull_opt.surrogate: BO iteration 320/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:29:04] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001798 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:29:05] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:02
+2026-07-01 21:30:09,371 [INFO] hull_opt.surrogate: Calibration at iteration 320
+2026-07-01 21:30:09,372 [INFO] hull_opt.surrogate: BO iteration 321/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:30:13] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 21:31:36,738 [INFO] hull_opt.surrogate: BO iteration 322/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:31:42] WARNING  Mesh element quality: 2.7602 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 21:33:05,433 [INFO] hull_opt.surrogate: BO iteration 323/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:33:09] WARNING  Mesh element quality: 3.0367 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:27
+2026-07-01 21:34:37,911 [INFO] hull_opt.surrogate: BO iteration 324/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:34:40] WARNING  Bulb volume capped: requested 0.006064, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:34:41] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:25
+2026-07-01 21:36:07,664 [INFO] hull_opt.surrogate: BO iteration 325/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:36:10] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:36:11] WARNING  Total mesh volume 0.8344 vs underwater volume 0.3042        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.743                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 4.1191 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 21:37:23,114 [INFO] hull_opt.surrogate: BO iteration 326/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:37:26] WARNING  Total mesh volume 0.7678 vs underwater volume 0.2100        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.655                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:37:27] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:52
+2026-07-01 21:38:20,346 [INFO] hull_opt.surrogate: BO iteration 327/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:38:23] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8936 vs underwater volume 0.3030        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.949                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:38:24] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 21:39:28,306 [INFO] hull_opt.surrogate: BO iteration 328/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:39:31] WARNING  Bulb volume capped: requested 0.049461, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008180 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:39:32] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 21:41:00,192 [INFO] hull_opt.surrogate: BO iteration 329/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:41:03] WARNING  Bulb volume capped: requested 0.049997, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008175 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7622 vs underwater volume 0.2932        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.599                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:41:04] WARNING  Mesh element quality: 1.6469 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 21:42:14,773 [INFO] hull_opt.surrogate: BO iteration 330/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:42:18] WARNING  Bulb volume capped: requested 0.049748, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008173 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7445 vs underwater volume 0.2898        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.569                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:42:19] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 21:43:30,251 [INFO] hull_opt.surrogate: BO iteration 331/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:43:35] WARNING  Mesh element quality: 2.5724 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:17
+2026-07-01 21:44:54,838 [INFO] hull_opt.surrogate: BO iteration 332/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:44:59] WARNING  Total mesh volume 0.8911 vs underwater volume 0.2155        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.136                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:45:00] WARNING  Mesh element quality: 3.0658 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 21:46:06,826 [INFO] hull_opt.surrogate: BO iteration 333/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:46:10] WARNING  Bulb volume capped: requested 0.016435, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:46:11] WARNING  Total mesh volume 0.8444 vs underwater volume 0.3022        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.794                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.1734 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 21:47:21,639 [INFO] hull_opt.surrogate: BO iteration 334/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:47:26] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 21:48:54,154 [INFO] hull_opt.surrogate: BO iteration 335/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:48:58] WARNING  Total mesh volume 0.9918 vs underwater volume 0.2957        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.354                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.2467 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:58
+2026-07-01 21:49:58,266 [INFO] hull_opt.surrogate: BO iteration 336/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:50:02] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 21:51:06,994 [INFO] hull_opt.surrogate: BO iteration 337/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:51:11] WARNING  Bulb volume capped: requested 0.049878, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008000 (keel_chord=0.248)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:51:12] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:16
+2026-07-01 21:52:30,392 [INFO] hull_opt.surrogate: BO iteration 338/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:52:33] WARNING  Bulb volume capped: requested 0.048996, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.9792 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 21:53:56,704 [INFO] hull_opt.surrogate: BO iteration 339/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:54:01] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:54:02] WARNING  Total mesh volume 0.6300 vs underwater volume 0.2477        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.543                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.8309 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:05
+2026-07-01 21:55:09,840 [INFO] hull_opt.surrogate: BO iteration 340/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:55:13] WARNING  Bulb volume capped: requested 0.040760, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:55:15] WARNING  Mesh element quality: 3.9268 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:04
+2026-07-01 21:56:20,475 [INFO] hull_opt.surrogate: Calibration at iteration 340
+2026-07-01 21:56:20,475 [INFO] hull_opt.surrogate: BO iteration 341/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:56:25] WARNING  Total mesh volume 1.0024 vs underwater volume 0.2892        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.466                                                 
+2026-07-01 21:56:26,368 [INFO] hull_opt.surrogate: BO iteration 342/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:56:26] WARNING  Mesh element quality: 2.3879 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:56:32] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:56:33] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 21:57:56,383 [INFO] hull_opt.surrogate: BO iteration 343/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:58:04] WARNING  Bulb volume capped: requested 0.049994, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:58:05] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:23
+2026-07-01 21:59:29,310 [INFO] hull_opt.surrogate: BO iteration 344/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:59:35] WARNING  Total mesh volume 0.8076 vs underwater volume 0.3087        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.616                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [21:59:36] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 22:00:37,665 [INFO] hull_opt.surrogate: BO iteration 345/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:00:44] WARNING  Total mesh volume 1.0918 vs underwater volume 0.2915        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.745                                                 
+2026-07-01 22:00:44,381 [INFO] hull_opt.surrogate: BO iteration 346/379
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.7533 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:00:47] WARNING  Total mesh volume 0.8015 vs underwater volume 0.3028        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.647                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:00:48] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 22:01:59,383 [INFO] hull_opt.surrogate: BO iteration 347/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:02:03] WARNING  Total mesh volume 0.8458 vs underwater volume 0.2756        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.069                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:02:04] WARNING  Mesh element quality: 2.3462 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 22:03:13,851 [INFO] hull_opt.surrogate: BO iteration 348/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:03:18] WARNING  Mesh element quality: 2.3755 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:06
+2026-07-01 22:04:26,516 [INFO] hull_opt.surrogate: BO iteration 349/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:04:29] WARNING  Bulb volume capped: requested 0.049965, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001771 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7750 vs underwater volume 0.2935        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.640                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:04:30] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:08
+2026-07-01 22:05:39,139 [INFO] hull_opt.surrogate: BO iteration 350/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:05:44] WARNING  Total mesh volume 0.8802 vs underwater volume 0.3035        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.901                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.1142 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:14
+2026-07-01 22:06:59,807 [INFO] hull_opt.surrogate: BO iteration 351/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:07:02] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.002103 (keel_chord=0.159)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:07:03] WARNING  Total mesh volume 0.7585 vs underwater volume 0.2914        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.602                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 22:08:14,624 [INFO] hull_opt.surrogate: BO iteration 352/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:08:21] WARNING  Bulb volume capped: requested 0.049852, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:08:22] WARNING  Mesh element quality: 3.4019 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 22:09:26,194 [INFO] hull_opt.surrogate: BO iteration 353/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:09:33] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 22:10:35,784 [INFO] hull_opt.surrogate: BO iteration 354/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:10:41] WARNING  Total mesh volume 0.8285 vs underwater volume 0.3043        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.723                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:07
+2026-07-01 22:11:50,483 [INFO] hull_opt.surrogate: BO iteration 355/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:11:59] WARNING  Mesh element quality: 2.7579 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:19
+2026-07-01 22:13:20,367 [INFO] hull_opt.surrogate: BO iteration 356/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:13:28] WARNING  Total mesh volume 0.7381 vs underwater volume 0.1909        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.867                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:13:29] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:02
+2026-07-01 22:14:32,715 [INFO] hull_opt.surrogate: BO iteration 357/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:14:40] WARNING  Bulb volume capped: requested 0.043517, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.007986 (keel_chord=0.248)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:14:41] WARNING  Mesh element quality: 2.7571 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:24
+2026-07-01 22:16:07,669 [INFO] hull_opt.surrogate: BO iteration 358/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:16:12] WARNING  Mesh element quality: 2.0404 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 22:17:33,980 [INFO] hull_opt.surrogate: BO iteration 359/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:17:37] WARNING  Bulb volume capped: requested 0.006065, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.003531 (keel_chord=0.189)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:17:38] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 22:19:01,474 [INFO] hull_opt.surrogate: BO iteration 360/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:19:07] WARNING  Total mesh volume 0.8435 vs underwater volume 0.1918        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=4.397                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.3324 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:52
+2026-07-01 22:20:00,790 [INFO] hull_opt.surrogate: Calibration at iteration 360
+2026-07-01 22:20:00,790 [INFO] hull_opt.surrogate: BO iteration 361/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:20:03] WARNING  Total mesh volume 0.9435 vs underwater volume 0.3064        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.079                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:20:04] WARNING  Mesh element quality: 1.9628 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:02
+2026-07-01 22:21:07,687 [INFO] hull_opt.surrogate: BO iteration 362/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:21:17] WARNING  Bulb volume capped: requested 0.049629, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.9463 vs underwater volume 0.2914        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.248                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:21:18] WARNING  Mesh element quality: 2.0178 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:54
+2026-07-01 22:22:13,921 [INFO] hull_opt.surrogate: BO iteration 363/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:22:19] WARNING  Bulb volume capped: requested 0.002017, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:22:20] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:20
+2026-07-01 22:23:42,149 [INFO] hull_opt.surrogate: BO iteration 364/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:23:45] WARNING  Total mesh volume 0.9731 vs underwater volume 0.2966        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.281                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.6357 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:12
+2026-07-01 22:24:59,206 [INFO] hull_opt.surrogate: BO iteration 365/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:25:01] WARNING  Bulb volume capped: requested 0.049998, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:25:02] WARNING  Mesh element quality: 2.6827 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:21
+2026-07-01 22:26:24,402 [INFO] hull_opt.surrogate: BO iteration 366/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:26:30] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 22:27:31,594 [INFO] hull_opt.surrogate: BO iteration 367/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:27:35] WARNING  Total mesh volume 0.9135 vs underwater volume 0.3009        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.036                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:27:36] WARNING  Mesh element quality: 2.0620 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:07
+2026-07-01 22:28:44,536 [INFO] hull_opt.surrogate: BO iteration 368/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:28:47] WARNING  Bulb volume capped: requested 0.025954, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001767 (keel_chord=0.150)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.7531 vs underwater volume 0.2991        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.518                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:28:48] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 22:29:58,878 [INFO] hull_opt.surrogate: BO iteration 369/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:30:02] WARNING  Total mesh volume 0.7706 vs underwater volume 0.3007        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.562                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.0831 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:10
+2026-07-01 22:31:14,835 [INFO] hull_opt.surrogate: BO iteration 370/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:31:22] WARNING  Total mesh volume 0.7539 vs underwater volume 0.2675        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.819                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 22:32:33,363 [INFO] hull_opt.surrogate: BO iteration 371/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:32:38] WARNING  Bulb volume capped: requested 0.049852, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.005635 (keel_chord=0.221)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:32:39] WARNING  Mesh element quality: 4.0856 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:22
+2026-07-01 22:34:03,426 [INFO] hull_opt.surrogate: BO iteration 372/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:34:09] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 22:35:36,775 [INFO] hull_opt.surrogate: BO iteration 373/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:35:44] WARNING  Total mesh volume 0.9032 vs underwater volume 0.3052        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.959                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 1.8718 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:03
+2026-07-01 22:36:49,686 [INFO] hull_opt.surrogate: BO iteration 374/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:36:55] WARNING  Mesh element quality: 3.3266 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:01
+2026-07-01 22:37:57,208 [INFO] hull_opt.surrogate: BO iteration 375/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:38:04] WARNING  Bulb volume capped: requested 0.031013, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.001795 (keel_chord=0.151)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:38:05] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:59
+2026-07-01 22:39:05,634 [INFO] hull_opt.surrogate: BO iteration 376/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:39:10] WARNING  Total mesh volume 0.8906 vs underwater volume 0.2917        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.053                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:39:11] WARNING  Mesh element quality: 2.4133 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:09
+2026-07-01 22:40:22,505 [INFO] hull_opt.surrogate: BO iteration 377/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:40:26] WARNING  Mesh element quality: 5.0000 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:26
+2026-07-01 22:41:53,641 [INFO] hull_opt.surrogate: BO iteration 378/379
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:41:56] WARNING  Total mesh volume 0.9895 vs underwater volume 0.2950        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=3.355                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Mesh element quality: 2.1521 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:58
+2026-07-01 22:42:56,261 [INFO] hull_opt.surrogate: BO iteration 379/379
+[36m(_evaluate_one_wrapper pid=65983)[0m Mesh element quality: 5.0000 (may affect solver)[32m [repeated 5x across cluster][0m
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:42:59] WARNING  Bulb volume capped: requested 0.045279, max possible        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     0.008181 (keel_chord=0.250)                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m            WARNING  Total mesh volume 0.8245 vs underwater volume 0.2943        
+[36m(_evaluate_one_wrapper pid=65983)[0m                     ratio=2.801                                                 
+[36m(_evaluate_one_wrapper pid=65983)[0m [22:43:00] WARNING  Mesh element quality: 1.7319 (may affect solver)            
+[36m(_evaluate_one_wrapper pid=65983)[0m Solving BEM problems ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:01:00
+2026-07-01 22:44:03,771 [INFO] hull_opt.surrogate: BO loop complete
+2026-07-01 22:44:03,773 [INFO] hull_opt.surrogate: Top 3 designs: []
+2026-07-01 22:44:03,773 [INFO] hull_opt: Optimization complete
+2026-07-01 22:44:03,773 [WARNING] hull_opt: No feasible designs found
+/home/anon/apps/boat/run_optimization.py:80: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  ax.legend()
+2026-07-01 22:44:04,761 [INFO] hull_opt: Summary plot saved: /home/anon/apps/boat/output/optimization_summary.png
+2026-07-01 22:44:04,765 [INFO] hull_opt: Pipeline complete
