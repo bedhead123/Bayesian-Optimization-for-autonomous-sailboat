@@ -1,0 +1,30 @@
+{
+  "design_0": {
+    "feasible": true,
+    "fom": -0.4382473103750714,
+    "rt_total": 46.44061977132286,
+    "rt_wave": 32.590049144272044,
+    "rt_friction": 13.850570627050814,
+    "stability_index": 1.25,
+    "roll_period": 1.7878982581405327,
+    "peak_accel": 1.021567185105616,
+    "righting_energy": 220.7584003439244,
+    "gm": 0.5241603982879035,
+    "cg_z": -0.4975845001860911,
+    "eq_heel_deg": 30.0,
+    "helm_fwd_deg": 26.568170249156413,
+    "helm_aft_deg": 26.568170249156413,
+    "helm_combined_deg": 26.568170249156413,
+    "rapid": {
+      "avs_deg": 179.99873296635565,
+      "max_gz_m": 0.5178096278489295,
+      "capsize_margin": 0.37298810378741126,
+      "storm_peak_accel_g": 2.1998601299879605,
+      "roll_sigma_deg": 26.526704352326846,
+      "parametric_roll_risk": false,
+      "slam_pressure_pa": 2279842.1184054604,
+      "inverted_pressure_pa": 4838.86640554784,
+      "storm_wind_heel_deg": 30.0
+    }
+  }
+}

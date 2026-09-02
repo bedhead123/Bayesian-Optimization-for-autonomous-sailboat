@@ -1,0 +1,153 @@
+bounds:
+  LWL:
+  - 2.3
+  - 2.5
+  BWL:
+  - 0.55
+  - 0.68
+  T_canoe:
+  - 0.28
+  - 0.36
+  Cp:
+  - 0.55
+  - 0.6
+  Cm:
+  - 0.78
+  - 0.9
+  LCB:
+  - 45.0
+  - 56.0
+  D_keel:
+  - 0.45
+  - 0.65
+  keel_chord:
+  - 0.18
+  - 0.26
+  bulb_vol:
+  - 0.0015
+  - 0.0025
+  bulb_pos:
+  - 0.3
+  - 0.5
+  E:
+  - 0.28
+  - 0.4
+  flare:
+  - 10.0
+  - 24.0
+  deadrise:
+  - 16.0
+  - 28.0
+  bilge_r:
+  - 0.18
+  - 0.3
+  keel_rake:
+  - 15.0
+  - 30.0
+  ballast_frac:
+  - 0.35
+  - 0.55
+  wingsail_pos:
+  - 0.30
+  - 0.75
+fixed:
+  target_speed_knots: 3.5
+  target_displacement: 0.10
+  gravity: 9.81
+  rho_water: 1025.0
+  nu_water: 1.19e-06
+  electronics_bay:
+  - 0.6
+  - 0.0
+  - 0.05
+  wingsail_cr_frac: 0.34
+  wingsail_tip_taper: 0.7
+  wingsail_span_frac: 1.0
+  wingsail_tail_area_frac: 0.35
+  wingsail_tail_arm_chords: 1.75
+  wingsail_mast_chord_frac: 0.25
+  wingsail_mast_mass: 7.0
+  wingsail_nose_pod_mass: 3.0
+  mast_cg_height_frac: 0.5
+  payload_mass_kg: 15.0
+  payload_cg_z: 0.30
+  hull_mass_floor_kg: 20.0
+  fouling_cf_mult: 1.25
+weights:
+  w1: 1.0
+  w2: 0.5
+  w3: 0.5
+  w4: 2.0
+  w5: 0.4
+  stability_normalization: 30.0
+  light_wind_bonus: 1.2
+  w6: 0.5
+  w7: 0.1
+  w8: 0.35
+  w9: 0.5
+  fom_drag_reference_n: 45.0
+optimization:
+  n_initial: 80
+  n_iter: 300
+  convergence_threshold: 0.01
+  min_iterations: 100
+  num_restarts: 20
+  raw_samples: 100
+  gp_jitter: 1.0e-06
+  lhs_min: 20
+  lhs_increment: 10
+  lhs_max: 40
+  lhs_seed: 42
+calibration:
+  frequency: 0
+  coarse_cells: 200000
+  tolerance: 0.2
+  timeout: 14400
+  n_procs: 8
+  end_time: 20.0
+  delta_t: 0.001
+  max_co: 0.7
+  retry_failed: false
+  convergence:
+    min_sim_time: 5.0
+    window_s: 3.0
+    rel_tol: 0.015
+    n_checks: 2
+    poll_interval_s: 60
+validation:
+  fine_cfd_cells: 500000
+  regular_wave_H: 0.06
+  regular_wave_T: 0.47
+  extreme_wave_H_factor: 4.0
+  drop_height: 15.0
+  inverted_speed_knots: 25.0
+  max_accel_g: 19.0
+  max_pressure_pa: 3200000.0
+  max_self_right_time_s: 10.0
+  rt_upper_bound_factor: 2.0
+  storm_wind_speed_knots: 80.0
+  safety_factor_composite: 2.0
+  min_righting_energy: 40.0
+  min_ballast_ratio: 0.25
+  min_reserve_buoyancy: 0.40
+  single_sail_max_helm_angle_deg: 5.0
+  n_procs: 8
+  gate_timeout: 14400
+  gate2_timeout: 28800
+wave_spectrum:
+  type: JONSWAP
+  Hs: 2.5
+  Tp: 9.0
+  gamma: 3.3
+  n_freq: 100
+  n_dir: 24
+  min_wind_speed_kt: 6.0
+paths:
+  output_dir: ./output/phase0
+  openfoam_env: /opt/openfoam2512/etc/bashrc
+  dualsphysics_dir: ./bin/dualsphysics/5.4
+  database: ./output/phase0_quick_test.db
+logging:
+  level: INFO
+  console: true
+  file: ./output/phase0/pipeline.log

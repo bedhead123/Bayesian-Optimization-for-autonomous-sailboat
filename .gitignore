@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.output/
+output/
+*.stl
+*.csv
+*.db
+*.log
+*.foam
+*.obj
+.venv/
+venv/
+.coverage
+bin/
+FluidX3D/
+.cursor/
