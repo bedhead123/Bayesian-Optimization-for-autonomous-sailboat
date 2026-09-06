@@ -33,6 +33,9 @@ paths:
 
 fixed:
   target_speed_knots: 3.5
+  max_speed_knots: 5.0
+  band_light_kt: 2.0
+  band_heavy_kt: 5.0
   target_displacement: 0.10
   gravity: 9.81
   rho_water: 1025.0
@@ -51,6 +54,8 @@ fixed:
   payload_cg_z: 0.30
   hull_mass_floor_kg: 20.0
   fouling_cf_mult: 1.25
+  draft_free_m: 1.0
+  draft_logistics_per_m: 0.3
 
 bounds:
   LWL: [2.30, 2.50]
@@ -59,9 +64,9 @@ bounds:
   Cp: [0.55, 0.60]
   Cm: [0.78, 0.90]
   LCB: [45.0, 56.0]        # %LWL from bow, 45 = midship anchor
-  D_keel: [0.45, 0.65]
+  D_keel: [0.45, 2.50]
   keel_chord: [0.18, 0.26]
-  bulb_vol: [0.0015, 0.0025]
+  bulb_vol: [0.002, 0.0065]
   bulb_pos: [0.30, 0.50]
   E: [0.28, 0.40]
   flare: [10.0, 24.0]
@@ -70,6 +75,10 @@ bounds:
   keel_rake: [15.0, 30.0]
   ballast_frac: [0.35, 0.55]
   wingsail_pos: [0.30, 0.75]  # %LWL from bow
+  sheer_bow: [0.0, 0.0]
+  sheer_stern: [0.0, 0.0]
+  stem_rake_deg: [0.0, 0.0]
+  forefoot_cut: [0.0, 0.6]
 
 weights:
   w1: 1.0
@@ -84,6 +93,12 @@ weights:
   w8: 0.35
   w9: 0.5
   fom_drag_reference_n: 45.0
+  band_light_wt: 0.25
+  band_medium_wt: 0.45
+  band_heavy_wt: 0.30
+  w_mission_drive: 1.2
+  w_gust: 0.6
+  w_leeway: 0.5
 
 wave_spectrum:
   type: JONSWAP

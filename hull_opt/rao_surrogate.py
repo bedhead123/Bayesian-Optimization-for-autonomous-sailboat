@@ -1,6 +1,6 @@
 """
 RAO surrogate: Torch MLP predicting (heave|pitch|roll) RAO magnitude from
-17-dim design vector + omega + heading_deg. Used to reduce storm BEM cost
+design vector + omega + heading_deg. Used to reduce storm BEM cost
 by evaluating at anchor frequencies only and interpolating rest via MLP.
 Key exports: RAOSurrogateConfig, RAOSurrogate
 """

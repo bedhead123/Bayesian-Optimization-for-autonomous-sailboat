@@ -25,8 +25,9 @@ CONFIG = load_config("config.yaml")
 NAMES = design_vector_names()
 BOUNDS = flattened_bounds()  # raw [-10, 10] GP-space bounds
 PHYS_BOUNDS = CONFIG.bounds.as_array()
-assert len(NAMES) == 17, f"Expected 17 params, got {len(NAMES)}"
-assert len(BOUNDS) == 17, f"Expected 17 bounds, got {len(BOUNDS)}"
+DIM = len(NAMES)
+assert DIM == len(BOUNDS), f"names/bounds dim mismatch: {DIM} vs {len(BOUNDS)}"
+assert DIM >= 17, f"Expected >=17 params, got {DIM}"
 
 LWL = CONFIG.fixed.LWL
 TARGET_DISP = CONFIG.fixed.target_displacement

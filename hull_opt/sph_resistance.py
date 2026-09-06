@@ -811,6 +811,21 @@ def run_inverted_pressure(case_dir, stl_path, x_dict, config,
         sim_time = getattr(config.validation, "sph_inverted_sim_time", 6.0)
         dt_out = max(0.02, min(0.1, sim_time / 50.0))
         mass = rho * getattr(config.fixed, "target_displacement", 0.145)
+        # Real CG + inertia (Bug #166): the tank must spin the hull about
+        # its true mass center, not the -0.4*T box fallback (deep-VCG hulls
+        # otherwise torque out and AbortBoundOut).
+        try:
+            from hull_opt.hydrostatics import (
+                compute_cg_z, compute_cg_x, compute_lumped_inertia)
+            _nabla = float(x_dict.get("underwater_volume",
+                                      x_dict.get("nabla", mass / rho)))
+            _cg = compute_cg_z(x_dict, nabla=_nabla, config=config)
+            _I = compute_lumped_inertia(
+                x_dict, {"underwater_volume": _nabla,
+                         "CB_x": x_dict.get("LWL", 2.4) / 2.0}, config=config)
+            _inertia = (float(_I[3, 3]), float(_I[4, 4]), float(_I[5, 5]))
+        except Exception:
+            _cg, _inertia = None, None
         write_inverted_case(
             case_dir,
             hull_stl_path=str(stl_path),
@@ -826,6 +841,9 @@ def run_inverted_pressure(case_dir, stl_path, x_dict, config,
             gravity=g,
             eb_coords=getattr(config.fixed, "electronics_bay", [0.0, 0.0, -0.05]),
             keel_chord=float(x_dict.get("keel_chord", 0.0)),
+            cg_z=_cg,
+            inertia=_inertia,
+            max_particles=int(getattr(config.calibration, "max_particles", 400000)),
         )
         run = run_sph_case(case_dir, config, timeout_s=timeout_s, gpu_lock=gpu_lock)
         result["status"] = run["status"]

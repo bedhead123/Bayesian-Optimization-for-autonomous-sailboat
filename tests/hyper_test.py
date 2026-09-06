@@ -26,8 +26,9 @@ from hull_opt.low_fidelity import evaluate_low_fidelity
 CONFIG = load_config("config.yaml")
 NAMES = design_vector_names()
 BOUNDS = flattened_bounds()
-assert len(NAMES) == 17, f"Expected 17 params, got {len(NAMES)}"
-assert len(BOUNDS) == 17, f"Expected 17 bounds, got {len(BOUNDS)}"
+DIM = len(NAMES)
+assert DIM == len(BOUNDS), f"names/bounds dim mismatch: {DIM} vs {len(BOUNDS)}"
+assert DIM >= 17, f"Expected >=17 params, got {DIM}"
 
 # ── Test result tracking ──────────────────────────────────────────────
 

@@ -158,15 +158,17 @@ _REPORT_COLUMNS = ["iter", "feasible", "fom",
                    "LWL", "BWL", "T_canoe", "Cp", "Cm", "LCB", "D_keel",
                    "keel_chord", "bulb_vol", "bulb_pos", "E", "flare",
                    "deadrise", "bilge_r", "keel_rake", "ballast_frac",
-                   "wingsail_pos",
+                   "wingsail_pos", "sheer_bow", "sheer_stern", "stem_rake_deg", "forefoot_cut",
                    "rt_total", "rt_wave", "rt_friction", "stability_index",
                    "righting_energy", "gm", "cg_z", "roll_period", "peak_accel",
                    "eq_heel_deg", "reserve_buoyancy", "downflooding_angle",
                    "ballast_ratio", "helm_fwd_deg", "helm_aft_deg",
-                   "helm_combined_deg", "lead_pct_lwl", "T_over_L", "ce_x", "clr_x",
+                   "helm_combined_deg", "lead_pct_lwl", "T_over_L", "LDR", "L_over_B",
+                   "SA_over_D", "Wb_over_DT", "ce_x", "clr_x",
                    "balance_worst_heel_ops", "balance_worst_heel_storm",
                    "balance_worst_leeway_ops", "balance_mean_drive",
-                   "balance_vmg_up",
+                   "balance_vmg_up", "mission_drive", "gust_margin",
+                   "heavy_leeway_deg", "draft_logistics_cost",
                    "n_violations", "error_code"]
 
 _RAPID_COLUMNS = ["avs_deg", "capsize_margin", "storm_peak_accel_g",
@@ -174,7 +176,9 @@ _RAPID_COLUMNS = ["avs_deg", "capsize_margin", "storm_peak_accel_g",
                   "inverted_pressure_pa", "storm_wind_heel_deg"]
 
 _BALANCE_COLUMNS = ["balance_worst_heel_ops", "balance_worst_heel_storm",
-                    "balance_worst_leeway_ops", "balance_mean_drive", "balance_vmg_up"]
+                    "balance_worst_leeway_ops", "balance_mean_drive", "balance_vmg_up",
+                    "mission_drive", "gust_margin", "heavy_leeway_deg",
+                    "draft_logistics_cost"]
 
 _RAPID_REPORT_COLUMNS = ["iter", "feasible", "fom", "min_margin"] + _RAPID_COLUMNS + ["worst_hard"]
 
@@ -261,6 +265,12 @@ def generate_results_report(db, config, output_dir: Path) -> None:
             "helm_fwd_deg": d.get("helm_fwd_deg"),
             "helm_aft_deg": d.get("helm_aft_deg"),
             "helm_combined_deg": d.get("helm_combined_deg"),
+            "lead_pct_lwl": cv.get("lead_pct_lwl", d.get("lead_pct_lwl")),
+            "T_over_L": cv.get("T_over_L", d.get("T_over_L")),
+            "LDR": cv.get("LDR"),
+            "L_over_B": cv.get("L_over_B"),
+            "SA_over_D": cv.get("SA_over_D"),
+            "Wb_over_DT": cv.get("Wb_over_DT"),
             "ce_x": cv.get("ce_x"),
             "clr_x": cv.get("clr_x"),
             "n_violations": n_viol,
@@ -292,13 +302,13 @@ def generate_results_report(db, config, output_dir: Path) -> None:
 
     widths = {}
     for c in _REPORT_COLUMNS:
-        widths[c] = max(len(c), max((len(_fmt(r[c])) for r in rows), default=0))
+        widths[c] = max(len(c), max((len(_fmt(r.get(c))) for r in rows), default=0))
 
     lines = ["# Per-Design Optimization Results\n"]
     lines.append(" | ".join(c.ljust(widths[c]) for c in _REPORT_COLUMNS))
     lines.append("-|-".join("-" * widths[c] for c in _REPORT_COLUMNS))
     for r in rows:
-        lines.append(" | ".join(_fmt(r[c]).ljust(widths[c]) for c in _REPORT_COLUMNS))
+        lines.append(" | ".join(_fmt(r.get(c)).ljust(widths[c]) for c in _REPORT_COLUMNS))
 
     rapid_rows = [r for r in rows
                   if any(r.get(c) is not None for c in _RAPID_COLUMNS + ["min_margin"])]
@@ -871,7 +881,7 @@ def run_medium_test(config) -> int:
     check("OF env exists", Path(config.paths.openfoam_env).exists())
     check("DS dir exists", Path(config.paths.dualsphysics_dir).exists())
     bdim = config.bounds.dim
-    check(f"Bounds dim = {bdim}", bdim == 17)
+    check(f"Bounds dim = {bdim}", bdim == len(design_vector_names()))
     names = design_vector_names()
     bounds = config.bounds.as_array()
     for i, name in enumerate(names):
@@ -1647,12 +1657,45 @@ def run_benchmark(config) -> int:
 
 
 def _clean_slate(output_dir: Path, db_path: Path):
-    """Wipe all artifacts from a previous run: DB, designs, outputs, mode file."""
+    """Wipe all artifacts from a previous run: DB, designs, outputs, mode file.
+
+    Bug #170: the campaign DB is IRREPLACEABLE (hours of BEM per design).
+    Never unlink it — move it to a timestamped backup dir first. A wipe
+    must be recoverable by definition; silent data loss is not cleanup.
+    """
+    import time
     logger.info("Fresh production run: wiping previous state for clean slate")
 
-    # Database files (including WAL/SHM)
+    # Database files (including WAL/SHM) — BACK UP, never delete.
     if db_path.exists():
-        db_path.unlink()
+        try:
+            import sqlite3
+            has_designs = False
+            try:
+                c = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+                tables = [r[0] for r in c.execute(
+                    "select name from sqlite_master where type='table'")]
+                if "designs" in tables:
+                    has_designs = c.execute("select count(*) from designs").fetchone()[0] > 0
+                c.close()
+            except Exception:
+                has_designs = True  # unreadable DB: assume precious
+            if has_designs or db_path.stat().st_size > 0:
+                stamp = time.strftime("%Y%m%d_%H%M%S")
+                bdir = output_dir / f".backup_{stamp}"
+                bdir.mkdir(parents=True, exist_ok=True)
+                for src in (db_path,
+                            db_path.parent / f"{db_path.name}-wal",
+                            db_path.parent / f"{db_path.name}-shm"):
+                    if src.exists():
+                        dest = bdir / src.name
+                        src.replace(dest)
+                logger.warning("Campaign DB backed up to %s (NOT deleted)", bdir)
+            else:
+                db_path.unlink()
+        except OSError:
+            if db_path.exists():
+                db_path.unlink()
     for sfx in ("-wal", "-shm"):
         (db_path.parent / f"{db_path.name}{sfx}").unlink(missing_ok=True)
 
@@ -1924,6 +1967,15 @@ def main():
 
         for d in top_designs:
             stl_path = d.get("cad_stl_path")
+            # File-truth: cad_stl_path is hull+deck (GZ/BEM); prefer the
+            # sibling hull_full.stl (keel+bulb, SPH/preview) for final CAD.
+            try:
+                _cand = Path(stl_path) if stl_path else None
+                _full = _cand.parent / "hull_full.stl" if _cand is not None else None
+                if _full is not None and _full.exists():
+                    stl_path = str(_full)
+            except Exception:
+                pass
             if stl_path and Path(stl_path).exists():
                 final_path = output_dir / f"final_design_{d['id']}.stl"
                 shutil.copy2(stl_path, final_path)

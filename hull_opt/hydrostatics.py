@@ -203,16 +203,20 @@ def compute_gz_area(gz_curve: np.ndarray, lo_deg: float = 0.0,
 
 def compute_avs(gz_curve: np.ndarray) -> float:
     """Angle of vanishing stability: first downward zero-crossing of GZ
-    after the peak; max angle in the curve if none, 0.0 if no positive
-    stability (max GZ <= 0)."""
+    after the upright positive lobe; max angle in the curve if none,
+    0.0 if no positive stability (max GZ <= 0).
+    Bug #171: was argmax-seeded — a dominant inverted (upside-down) lobe
+    made the search start at ~180° and return 180° despite a ~110° first
+    crossing. Now scans from the first positive sample, so the FIRST
+    crossing is always found."""
     if gz_curve is None or len(gz_curve) < 2:
         return 0.0
     angles = gz_curve[:, 0]
     gz = np.nan_to_num(gz_curve[:, 1], nan=0.0)
-    max_idx = int(np.argmax(gz))
-    if gz[max_idx] <= 0.0:
+    if np.max(gz) <= 0.0:
         return 0.0
-    for i in range(max_idx, len(gz) - 1):
+    start = int(np.argmax(gz > 0.0))
+    for i in range(start, len(gz) - 1):
         if gz[i] > 0.0 and gz[i + 1] <= 0.0:
             t = gz[i] / (gz[i] - gz[i + 1])
             return float(angles[i] + t * (angles[i + 1] - angles[i]))
@@ -236,6 +240,65 @@ def compute_righting_energy(gz_curve: np.ndarray, max_heel_deg: float = 90.0,
                               f"from displacement ({displacement:.4f}) by {vol_ratio*100:.1f}%")
     area_under_curve = compute_gz_area(gz_curve, 0.0, max_heel_deg)
     return rho * g * displacement * area_under_curve
+
+
+def _ballast_struct_split(total0: float, bulb_mass: float, keel_mass: float,
+                         mast_mass: float, payload_mass: float,
+                         ballast_frac: float, bulb_vol: float,
+                         D_keel: float, keel_chord: float,
+                         hull_floor: float, config=None) -> dict:
+    """Single source for the ballast/structure mass split (Bug #166).
+
+    - ballast = total0 * frac, floored against hull_floor (legacy behavior).
+    - cap = bulb_vol * 11340 (lead): m_tip sits IN the bulb at -(T+D);
+      m_fin (excess) is distributed in the fin at -(T+D/2), midship.
+    - m_struct: DERIVED cantilever scantling (Bug #168, PYD Ch.13) — NOT
+      a tuned coefficient. Root moment M = tip_mass * g * D * safety
+      (tip = bulb lead + fitted ballast; safety =
+      validation.safety_factor_composite). Rectangular root section
+      (chord c, combined skin t): S = t*c^2/6 >= M/sigma_allow ->
+      t = 6*M/(sigma*c^2); m = t * planform(D*c) * rho_struct.
+      sigma/rho_struct from fixed.structural_allowable_stress_pa /
+      fixed.structural_density_kg_m3 — the boat's layup is Kevlar outer
+      (impact: animals/driftwood), glass general loading, CARBON primary
+      structure, metal frame where necessary, so the root sizes in carbon.
+      Laminate is thickest at the root tapering toward the tip, so its
+      centroid sits ~D/3 BELOW the root: z = -(T + D/3) (Bug #171: was
+      -(T + 2D/3), the centroid of a tip-heavy triangle — backwards).
+      floors, bolts, grounding shoe excluded (not modeled anywhere else
+      either); the number is a lower bound, stated openly.
+    Returns dict(ballast, m_tip, m_fin, m_struct, hull, total).
+    """
+    ballast = max(0.0, total0 * ballast_frac)
+    hull = total0 - bulb_mass - keel_mass - ballast - mast_mass - payload_mass
+    if hull < hull_floor:
+        ballast = max(0.0, total0 - hull_floor - bulb_mass - keel_mass
+                      - mast_mass - payload_mass)
+        hull = max(hull_floor, total0 - bulb_mass - keel_mass
+                   - ballast - mast_mass - payload_mass)
+    cap = max(0.0, bulb_vol) * 11340.0
+    m_tip = min(ballast, cap)
+    m_fin = max(0.0, ballast - cap)
+    _D = max(D_keel, 0.0)
+    _c = max(keel_chord, 1e-6)
+    try:
+        _g = 9.81
+        _sig = 600e6
+        _rho = 1600.0
+        _k = 2.0
+        if config is not None:
+            _sig = float(getattr(config.fixed, "structural_allowable_stress_pa", _sig))
+            _rho = float(getattr(config.fixed, "structural_density_kg_m3", _rho))
+            _k = float(getattr(config.validation, "safety_factor_composite", _k)) \
+                if getattr(config, "validation", None) is not None else _k
+        _M = (bulb_mass + ballast) * _g * _D * _k
+        _t = 6.0 * _M / max(_sig * _c * _c, 1e-9)
+        m_struct = _t * _D * _c * _rho
+    except Exception:
+        m_struct = 0.0
+    total = total0 + m_struct
+    return {"ballast": ballast, "m_tip": m_tip, "m_fin": m_fin,
+            "m_struct": m_struct, "hull": hull, "total": total}
 
 
 def compute_cg_z(x_dict: dict, nabla: Optional[float] = None,
@@ -275,6 +338,9 @@ def compute_cg_z(x_dict: dict, nabla: Optional[float] = None,
     rho = 1025.0
     if nabla is not None and nabla > 0:
         base_mass = nabla * rho
+    elif config is not None:
+        # True displacement basis — never the raw box (overstates mass 2-3x).
+        base_mass = float(config.fixed.target_displacement) * rho
     else:
         LWL = x_dict.get("LWL", 2.4)
         T_canoe_hull = x_dict.get("T_canoe", 0.3)
@@ -282,26 +348,26 @@ def compute_cg_z(x_dict: dict, nabla: Optional[float] = None,
         Cm_hull = x_dict.get("Cm", 0.75)
         base_mass = BWL * LWL * T_canoe_hull * Cp_hull * Cm_hull * rho
 
-    total_mass = base_mass + mast_mass_total + payload_mass
+    total0 = base_mass + mast_mass_total + payload_mass
     bulb_mass = bulb_vol * 11340  # Always from actual bulb geometry
-    keel_mass = max(0, D_keel * keel_chord * (BWL * 0.06) * 0.5 * 1025)  # Always from actual keel geometry
-    ballast_mass = total_mass * ballast_frac  # Ballast is additional internal mass
-    hull_mass = total_mass - bulb_mass - keel_mass - ballast_mass - mast_mass_total - payload_mass
-    # Structural floor: a 2.4 m FRP hull cannot weigh 0-5 kg (Fanhai-T2
-    # optimized hull: 38.7 kg at 2.0 m). Excess ballast is returned to the
-    # bulb so the floor never leaves fake mass in the model.
-    if hull_mass < hull_floor:
-        ballast_mass = max(0.0, total_mass - hull_floor - bulb_mass - keel_mass
-                           - mast_mass_total - payload_mass)
-        hull_mass = max(hull_floor, total_mass - bulb_mass - keel_mass
-                        - ballast_mass - mast_mass_total - payload_mass)
+    keel_mass = max(0, D_keel * keel_chord * (keel_chord * 0.12) * 0.5 * 1025)  # chord-based t/c 12% (PYD), matches mesh
+    _sp = _ballast_struct_split(total0, bulb_mass, keel_mass, mast_mass_total,
+                                payload_mass, ballast_frac, bulb_vol,
+                                D_keel, keel_chord, hull_floor, config)
+    ballast_mass, hull_mass = _sp["ballast"], _sp["hull"]
+    total_mass, m_struct = _sp["total"], _sp["m_struct"]
 
     hull_cg_z = -T_hull * 0.4
     keel_cg_z = -(T_hull + D_keel * 0.5)
     bulb_cg_z = -(T_hull + D_keel)
-    ballast_cg_z = -(T_hull + D_keel)  # ballast lives IN the bulb (lowest VCG, PYD Ch.6)
+    # Honest split (Bug #166): only cap-fitted lead at the bulb point;
+    # excess rides mid-fin; root structure sits root-biased (raises VCG).
+    tip_cg_z = -(T_hull + D_keel)
+    fin_cg_z = -(T_hull + D_keel * 0.5)
+    struct_cg_z = -(T_hull + D_keel / 3.0)  # root-heavy tapered laminate: centroid D/3 below root (Bug #171)
     cg_z = (hull_mass * hull_cg_z + keel_mass * keel_cg_z + bulb_mass * bulb_cg_z
-            + ballast_mass * ballast_cg_z + payload_mass * payload_cg_z
+            + _sp["m_tip"] * tip_cg_z + _sp["m_fin"] * fin_cg_z
+            + m_struct * struct_cg_z + payload_mass * payload_cg_z
             + mast_z_num) / max(1e-10, total_mass)
     return cg_z
 
@@ -325,14 +391,18 @@ def compute_cg_x(x_dict: dict, config, cb_x: float = 0.0) -> float:
     BWL = x_dict.get("BWL", 0.5)
     rho = 1025.0
 
-    if x_dict.get("underwater_volume", x_dict.get("nabla")) is not None and x_dict.get("underwater_volume", x_dict.get("nabla")) > 0:
-        nabla = x_dict.get("underwater_volume", x_dict.get("nabla"))
+    _nabla_in = x_dict.get("underwater_volume", x_dict.get("nabla"))
+    if _nabla_in is not None and _nabla_in > 0:
+        nabla = _nabla_in
+    elif config is not None:
+        # True displacement basis — never the raw box (overstates mass 2-3x).
+        nabla = float(config.fixed.target_displacement)
     else:
         Cp = x_dict.get("Cp", 0.55)
         Cm = x_dict.get("Cm", 0.75)
         nabla = BWL * LWL * T_hull * Cp * Cm
 
-    total_mass = nabla * rho
+    total0 = nabla * rho
 
     mast_mass_total = 0.0
     mast_x_num = 0.0
@@ -350,23 +420,23 @@ def compute_cg_x(x_dict: dict, config, cb_x: float = 0.0) -> float:
         payload_mass = float(getattr(config.fixed, "payload_mass_kg", 0.0))
         hull_floor = float(getattr(config.fixed, "hull_mass_floor_kg", 20.0))
 
-    total_mass += mast_mass_total + payload_mass  # consistent with compute_cg_z
+    total0 += mast_mass_total + payload_mass  # consistent with compute_cg_z
     bulb_mass = bulb_vol * 11340
-    keel_mass = max(0, D_keel * keel_chord * (BWL * 0.06) * 0.5 * 1025)
-    ballast_mass = total_mass * ballast_frac  # (displacement + mast + payload) * frac, consistent with compute_cg_z
-    hull_mass = total_mass - bulb_mass - keel_mass - ballast_mass - mast_mass_total - payload_mass
-    if hull_mass < hull_floor:
-        ballast_mass = max(0.0, total_mass - hull_floor - bulb_mass - keel_mass
-                           - mast_mass_total - payload_mass)
-        hull_mass = max(hull_floor, total_mass - bulb_mass - keel_mass
-                        - ballast_mass - mast_mass_total - payload_mass)
+    keel_mass = max(0, D_keel * keel_chord * (keel_chord * 0.12) * 0.5 * 1025)
+    _sp = _ballast_struct_split(total0, bulb_mass, keel_mass, mast_mass_total,
+                                payload_mass, ballast_frac, bulb_vol,
+                                D_keel, keel_chord, hull_floor, config)
+    ballast_mass, hull_mass = _sp["ballast"], _sp["hull"]
+    total_mass = _sp["total"]
 
     if not np.isfinite(cb_x) or abs(cb_x) < 1e-12:
         cb_x = (x_dict.get("LCB", 45.0) / 100.0) * LWL
     hull_cg_x = cb_x
     bulb_x = bulb_pos * LWL
+    # Honest split (Bug #166): tip-fit lead at bulb, excess + structure midship.
     cg_x = (hull_mass * hull_cg_x + keel_mass * (LWL / 2.0)
-            + bulb_mass * bulb_x + ballast_mass * bulb_x   # ballast IN the bulb (was midship)
+            + (bulb_mass + _sp["m_tip"]) * bulb_x
+            + (_sp["m_fin"] + _sp["m_struct"]) * (LWL / 2.0)
             + payload_mass * payload_cg_x + mast_x_num) / max(1e-10, total_mass)
     return float(cg_x)
 
@@ -408,19 +478,35 @@ def compute_lumped_inertia(x_dict: dict, hydro: dict, config=None) -> np.ndarray
     payload_mass = float(getattr(config.fixed, "payload_mass_kg", 0.0)) if config is not None else 0.0
     payload_cg_z = float(getattr(config.fixed, "payload_cg_z", 0.30)) if config is not None else 0.30
 
-    total_mass = base_mass + mast_mass_total + payload_mass
+    total0 = base_mass + mast_mass_total + payload_mass
     bulb_mass = bulb_vol * 11340
-    keel_mass = max(0.0, D_keel * keel_chord * (BWL * 0.06) * 0.5 * rho)
-    ballast_mass = max(0.0, total_mass * ballast_frac)
-    hull_mass = max(0.0, total_mass - bulb_mass - keel_mass - ballast_mass
-                    - mast_mass_total - payload_mass)
+    keel_mass = max(0.0, D_keel * keel_chord * (keel_chord * 0.12) * 0.5 * rho)
+    hull_floor = float(getattr(config.fixed, "hull_mass_floor_kg", 20.0)) if config is not None else 20.0
+    _sp = _ballast_struct_split(total0, bulb_mass, keel_mass, mast_mass_total,
+                                payload_mass, ballast_frac, bulb_vol,
+                                D_keel, keel_chord, hull_floor, config)
+    ballast_mass, hull_mass = _sp["ballast"], _sp["hull"]
+    total_mass, m_struct = _sp["total"], _sp["m_struct"]
 
-    # (mass, x, y, z) about the mesh frame — mirrors compute_cg_z/compute_cg_x
+    # (mass, x, y, z) about the mesh frame — mirrors compute_cg_z/compute_cg_x.
+    # Honest split (Bug #166): tip-fit lead at bulb depth, excess mid-fin,
+    # root structure root-biased. Hull at CB_x, payload at electronics_bay.
+    cb_x = float(hydro.get("CB_x", 0.5 * LWL))
+    if not np.isfinite(cb_x) or abs(cb_x) < 1e-12:
+        cb_x = 0.5 * LWL
+    pay_x = 0.5 * LWL
+    if config is not None:
+        try:
+            pay_x = float(config.fixed.electronics_bay[0]) * LWL
+        except Exception:
+            pay_x = 0.5 * LWL
     points = [
-        (hull_mass, 0.5 * LWL, 0.0, -0.4 * T_hull),
+        (hull_mass, cb_x, 0.0, -0.4 * T_hull),
         (keel_mass, 0.5 * LWL, 0.0, -(T_hull + 0.5 * D_keel)),
-        (bulb_mass + ballast_mass, bulb_pos * LWL, 0.0, -(T_hull + D_keel)),
-        (payload_mass, 0.5 * LWL, 0.0, payload_cg_z),
+        (bulb_mass + _sp["m_tip"], bulb_pos * LWL, 0.0, -(T_hull + D_keel)),
+        (_sp["m_fin"], 0.5 * LWL, 0.0, -(T_hull + 0.5 * D_keel)),
+        (m_struct, 0.5 * LWL, 0.0, -(T_hull + D_keel / 3.0)),
+        (payload_mass, pay_x, 0.0, payload_cg_z),
         (mast_mass_total, mast_x, 0.0, mast_z),
     ]
     cg_z = sum(m * z for m, _, _, z in points) / max(1e-9, total_mass)
@@ -926,14 +1012,18 @@ def compute_wind_heel_equilibrium(gz_curve: np.ndarray, rig: dict,
     if x_dict is not None and windage_area <= 0:
         BWL = float(x_dict.get("BWL", 0.6))
         E = float(x_dict.get("E", 0.3))
+        # Sheer-integrated freeboard: mean deck height incl. bow/stern kick
+        sb = float(x_dict.get("sheer_bow", 0.0))
+        ss = float(x_dict.get("sheer_stern", 0.0))
+        E_mean = E + 0.18 * sb + 0.12 * ss
         mast_d = 0.25 * float(rig["main"].get("cr", 0.4))
         mast_h = 0.35 * float(rig["main"].get("span", 2.4))
-        a_hull = max(0.0, BWL * E)
+        a_hull = max(0.0, BWL * E_mean)
         a_mast = max(0.0, mast_d * mast_h)
         total_a = a_hull + a_mast
         if total_a > 0:
             windage_area = total_a
-            windage_height = (a_hull * 0.5 * E + a_mast * (E + 0.5 * mast_h)) / total_a
+            windage_height = (a_hull * 0.5 * E_mean + a_mast * (E_mean + 0.5 * mast_h)) / total_a
     for deg in np.linspace(0, 90, 19):
         wind_arm = compute_wind_heeling_arm(
             deg, storm_wind_ms, sail_area_feathered, sail_height,

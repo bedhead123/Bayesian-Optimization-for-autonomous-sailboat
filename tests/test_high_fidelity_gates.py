@@ -83,7 +83,16 @@ def test_gate1_tank_vol_matches_towing_writer_and_fits_budget(tmp_path):
 
     # Generate a current-bounds max-draft hull (legacy output/design_* STLs
     # carry the pre-2026-09-01 deep keels and must not drive this check).
+    # Insane-mode D_keel max can exceed LWL-T_canoe (RealityCheck rejects
+    # T+D>LWL), so clamp to the largest BUILDABLE draft, not the raw max.
+    from hull_opt.config import design_vector_names
+    _names = design_vector_names()
     max_vec = np.array([hi for _, hi in b.as_array()], dtype=np.float64)
+    _di = _names.index("D_keel")
+    D_keel = min(D_keel, LWL - T_canoe - 0.01)
+    _p = (D_keel - b.D_keel[0]) / max(1e-9, b.D_keel[1] - b.D_keel[0])
+    _p = min(max(_p, 1e-6), 1.0 - 1e-6)
+    max_vec[_di] = -np.log(1.0 / _p - 1.0)  # inverse-sigmoid to raw space
     stl_path, _, _, _ = generate_hull(
         max_vec, output_dir=str(tmp_path / "hull"),
         LWL=LWL, target_displacement=cfg.fixed.target_displacement,

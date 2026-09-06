@@ -102,6 +102,10 @@ def validate_nurbs_patches(patches: list) -> tuple[bool, str]:
                 return False, f"Stern not closed at y=0 in patch '{patch.name}'"
 
         for j in range(n_v):
+            # Bulb is a closed ellipsoid ring (fore-aft circle), not a
+            # hull-like bow->stern sheet — monotonic-x does not apply.
+            if "bulb" in patch.name:
+                continue
             x_vals = ctrl[:, j, 0]
             if np.any(np.diff(x_vals) < -1e-6):
                 return False, f"Non-monotonic x in patch '{patch.name}' at v={j}"
@@ -185,6 +189,10 @@ def validate_design_vector(x_dict: dict, config=None) -> Tuple[bool, str]:
             "keel_rake": (0.0, 35.0),
             "ballast_frac": (0.0, 1.0),
             "wingsail_pos": (0.0, 1.0),
+            "sheer_bow": (0.0, 0.35),
+            "sheer_stern": (0.0, 0.20),
+            "stem_rake_deg": (0.0, 30.0),
+            "forefoot_cut": (0.0, 0.9),
         }
         for key, (min_val, max_val) in bounds.items():
             if key in x_dict:

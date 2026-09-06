@@ -17,23 +17,28 @@ def test_load_config_defaults():
 def test_bounds_as_array():
     config = load_config("config.yaml")
     bounds = config.bounds.as_array()
-    assert len(bounds) == 17
+    assert len(bounds) == 21
     for lo, hi in bounds:
-        assert lo < hi
+        assert lo <= hi
+    # flat-deck directive: sheer/rake pinned
+    d = config.bounds.to_dict()
+    assert d["sheer_bow"] == [0.0, 0.0]
+    assert d["forefoot_cut"] == [0.0, 0.6]
 
 
 def test_bounds_dim():
     config = load_config("config.yaml")
-    assert config.bounds.dim == 17
+    assert config.bounds.dim == 21
 
 
 def test_design_vector_names():
     names = design_vector_names()
-    assert len(names) == 17
+    assert len(names) == 21
     assert names[0] == "LWL"
     assert names[1] == "BWL"
     assert names[3] == "Cp"
-    assert names[-1] == "wingsail_pos"
+    assert names[-1] == "forefoot_cut"
+    assert names[-2] == "stem_rake_deg"
 
 
 def test_bounds_to_dict():
@@ -43,10 +48,11 @@ def test_bounds_to_dict():
               "D_keel", "keel_chord", "bulb_vol", "bulb_pos",
               "E", "flare", "deadrise",
               "bilge_r", "keel_rake", "ballast_frac",
-              "wingsail_pos"]:
+              "wingsail_pos", "sheer_bow", "sheer_stern", "stem_rake_deg",
+              "forefoot_cut"]:
         assert k in d
         assert len(d[k]) == 2
-        assert d[k][0] < d[k][1]
+        assert d[k][0] <= d[k][1]  # pinned [0,0] flat-deck bounds allowed
 
 
 def test_config_is_frozen():

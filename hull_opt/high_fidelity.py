@@ -451,8 +451,11 @@ def _gate_fine_cfd(case_dir, stl_path, speed_ms, LWL, B, T_hull,
                                               config.fixed.gravity,
                                               n_z=max(20, int(np.ceil(20 * (T_hull + D_keel) / max(T_hull, 1e-6)))))
     target_nabla = config.fixed.target_displacement
+    from hull_opt.michell import delft_cap_frac as _delft_cap_frac
+    _Fn_gate = float(speed_ms) / max(1e-9, (config.fixed.gravity * max(1e-9, LWL)) ** 0.5)
     Rw = capped_wave_resistance(Rw_raw, target_nabla, config.fixed.rho_water,
-                                config.fixed.gravity)
+                                config.fixed.gravity,
+                                cap_frac=_delft_cap_frac(_Fn_gate))
     Rt_pred, _, _ = compute_total_resistance(speed_ms, area, LWL,
                                               config.fixed.rho_water,
                                               config.fixed.nu_water,

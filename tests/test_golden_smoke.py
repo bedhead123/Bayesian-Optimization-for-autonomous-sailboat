@@ -19,7 +19,7 @@ def test_designs_json_complete():
     assert len(designs) == 6, f"Expected 6 designs, got {len(designs)}"
     for i, dv in enumerate(designs):
         assert isinstance(dv, list), f"Design {i} is not a list"
-        assert len(dv) == 17, f"Design {i} has {len(dv)} elements (expected 17)"
+        assert len(dv) in (17, 20, 21), f"Design {i} has {len(dv)} elements (expected 17/20 legacy or 21)"
         for j, v in enumerate(dv):
             assert isinstance(v, (int, float)), f"Design {i}[{j}] is not numeric"
 

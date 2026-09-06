@@ -21,9 +21,9 @@ class BoundsConfig:
     Cp: tuple[float, float] = (0.55, 0.60)
     Cm: tuple[float, float] = (0.78, 0.90)
     LCB: tuple[float, float] = (45.0, 56.0)
-    D_keel: tuple[float, float] = (0.45, 0.65)
+    D_keel: tuple[float, float] = (0.45, 2.50)
     keel_chord: tuple[float, float] = (0.18, 0.26)
-    bulb_vol: tuple[float, float] = (0.0015, 0.0025)
+    bulb_vol: tuple[float, float] = (0.002, 0.0065)
     bulb_pos: tuple[float, float] = (0.30, 0.50)
     E: tuple[float, float] = (0.28, 0.40)
     flare: tuple[float, float] = (10.0, 24.0)
@@ -32,13 +32,19 @@ class BoundsConfig:
     keel_rake: tuple[float, float] = (15.0, 30.0)
     ballast_frac: tuple[float, float] = (0.35, 0.55)
     wingsail_pos: tuple[float, float] = (0.30, 0.75)
+    sheer_bow: tuple[float, float] = (0.0, 0.0)
+    sheer_stern: tuple[float, float] = (0.0, 0.0)
+    stem_rake_deg: tuple[float, float] = (0.0, 0.0)
+    forefoot_cut: tuple[float, float] = (0.0, 0.6)
 
     def as_array(self) -> list[tuple[float, float]]:
         return [self.LWL, self.BWL, self.T_canoe, self.Cp, self.Cm,
                 self.LCB, self.D_keel, self.keel_chord, self.bulb_vol,
                 self.bulb_pos, self.E, self.flare,
                 self.deadrise, self.bilge_r, self.keel_rake,
-                self.ballast_frac, self.wingsail_pos]
+                self.ballast_frac, self.wingsail_pos,
+                self.sheer_bow, self.sheer_stern, self.stem_rake_deg,
+                self.forefoot_cut]
 
     @property
     def dim(self) -> int:
@@ -52,6 +58,11 @@ class BoundsConfig:
 class FixedConfig:
     LWL: float = 2.4
     target_speed_knots: float = 3.5
+    max_speed_knots: float = 5.0  # user-stated boat max (Bug #169): heavy-band
+    # polar sails at this speed, not target; Fn ~0.53 at 2.4 m LWL (past the
+    # 0.45 barrier — wave pricing honest via Delft-range formulae, not capped).
+    band_light_kt: float = 2.0  # drift mobility speed for the 5 kt wind band
+    band_heavy_kt: float = 5.0  # breeze-on speed for the 22 kt band (= max)
     target_displacement: float = 0.10
     use_nurbs_geometry: bool = True
     use_nurbs_gz: bool = True
@@ -72,6 +83,20 @@ class FixedConfig:
     payload_cg_z: float = 0.30
     hull_mass_floor_kg: float = 20.0
     fouling_cf_mult: float = 1.25
+    # Draft logistics (Bug #169: user redefined draft as inconvenience-with-
+    # price, not a wall). Transport/handling prices ramp above draft_free_m
+    # (ramp-launchable free); absolute physical cap lives in constraints.py
+    # (T_total > LWL = infeasible — RealityCheck). Rate is a stated judgment.
+    draft_free_m: float = 1.0  # ramp/trailer launchable without crane
+    draft_logistics_per_m: float = 0.3  # FoM per meter over free (judgment, sens-tested)
+    # Layup schedule (user-specified, Bug #168): Kevlar outer skin for impact
+    # protection (marine animals, driftwood), fiberglass for general loading,
+    # CARBON FIBER for primary structure, metal frame/keelbolts where necessary.
+    # The keel-root cantilever calc below sizes the CARBON primary structure;
+    # allowable is carbon/epoxy woven ultimate (safety applied separately via
+    # validation.safety_factor_composite inside the calc).
+    structural_allowable_stress_pa: float = 600e6  # carbon/epoxy woven ultimate tensile
+    structural_density_kg_m3: float = 1600.0  # carbon/epoxy composite
 
 
 @dataclass(frozen=True)
@@ -88,6 +113,14 @@ class WeightConfig:
     stability_normalization: float = 30.0
     light_wind_bonus: float = 1.2
     fom_drag_reference_n: float = 45.0
+    # Mission scoring (Bug #169: ocean crossing, mostly reach/run, gust-ready).
+    # Band weights sum to 1; reach/run drive priced per band against Rt.
+    band_light_wt: float = 0.25    # 5 kt — drift mobility
+    band_medium_wt: float = 0.45   # 10-12 kt — the working band
+    band_heavy_wt: float = 0.30    # 22 kt — breeze-on + gust readiness
+    w_mission_drive: float = 1.2   # reach/run drive per band (judgment)
+    w_gust: float = 0.6            # heavy-band heel-margin reward (judgment)
+    w_leeway: float = 0.5          # VMG-priced leeway slope (judgment)
 
 
 @dataclass(frozen=True)
@@ -402,4 +435,5 @@ def design_vector_names() -> list[str]:
             "D_keel", "keel_chord", "bulb_vol", "bulb_pos",
             "E", "flare", "deadrise",
             "bilge_r", "keel_rake", "ballast_frac",
-            "wingsail_pos"]
+            "wingsail_pos", "sheer_bow", "sheer_stern", "stem_rake_deg",
+            "forefoot_cut"]

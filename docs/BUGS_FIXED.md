@@ -1672,3 +1672,117 @@ This document records every bug found and fixed in the codebase. Future agents s
 - **Fix:** Design-adaptive storm dp. `storm_domain()` is now the single source of truth for tank geometry (shared by `write_storm_case` and the estimator). `_estimate_storm_dp` budgets the layout before GenCase: count ≈ `0.65 · V_defbox / dp³` (fill coefficient fitted to the 6 real layouts, k=0.620-0.661). Hulls whose nominal-dp estimate is below 480k keep dp=0.06 untouched; larger hulls are coarsened just enough to land near the 420k target (ceil to 3 decimals, clamped to [dp_nominal, 0.10], self-checked against the cap). Non-finite inputs fall back to dp_nominal; the post-GenCase 500k abort remains as the final safety net.
 - **Verification:** All 6 real campaign layouts replay through the estimator — the 4 passing cases keep dp=0.06, the 2 failing cases get dp=0.064 (~410k est, well under the cap); new `TestAdaptiveStormDp` unit tests (real failing dims, unchanged small hull, NaN fallback, extreme clamp); `test_sph_gates.py`, `test_sph_lock.py`, `test_sph_resistance_fixes.py` green.
 - **Impact:** Big-hull storms now run (≤10% coarser dp, capped at 0.10) instead of being lost; previously-passing storms are bit-identical.
+
+## Bug #163: Vertical stem + forward-swept fin + quarter-bulb-cap + 4-way mass split (JFR/PYD/Fanhai-T2 overhaul)
+
+- **Files:** `hull_opt/config.py`, `hull_opt/param_layer.py`, `config.yaml/fast/phase0.yaml`, `hull_opt/geometry.py` (`_sheer_height`, `_stem_rake_shift`, `_build_nurbs_control_net`, `compute_half_breadth_analytic`, SAC loop, `_build_keel_patch`, `_build_bulb_patch`, `keel_half_breadth`, `_compute_hydrostatics`, `_tessellate` docs), `hull_opt/hydrostatics.py` (`compute_cg_z/x`, `compute_lumped_inertia`, windage), `hull_opt/geometry_validator.py`, `hull_opt/constraints.py` (deck_beam, bulb capacity, JFR monitors), `hull_opt/rapid_gates.py` (inverted fallback), `hull_opt/low_fidelity.py` (appendage area), `run_optimization.py` (final copy, report cols), `tests/test_plan_impl.py` (new)
+- **Severity:** High (all three user-visible defects on finalist renders + physics audit findings)
+- **Discovery:** Finalist side-view render (flat slab deck, stubby forward-leaning fin, detached bulb speck) + code audit vs JFR review / PYD 5th ed / Fanhai-T2 SIMP paper.
+- **Root causes:**
+  1. Bow: `_sheer_height` returned flat `E`; no `dz(x)`/`dx(z)` DOF existed, validator enforced monotonic-x vertical ends.
+  2. Keel: sweep sign built forward (`(z-root)*tan`, tip -0.25 m) while `rig.extended_keel_clr_x` assumed aft (+0.11 m) — 0.36 m / 14% LWL disagreement; t/c tied to BWL (23% corner); no fillet.
+  3. Bulb: single-octant control net y-mirrored to a 1/4 open dome hanging on point contact; `bulb_vol` cap 0.0025 held 28 kg vs 45-70 kg demand (29-39 t/m³ implied); 4 mass paths disagreed by ~18 kg.
+- **Fix:** 20-dim vector (+`sheer_bow [0,0.25]`, `sheer_stern [0,0.12]`, `stem_rake_deg [0,25]`, flat 0.30-0.70 mid-deck, topside-only rake, sheer-exempt SAC scaling, analytic cap at sheer); aft sweep + root fillet + chord-based 12% t/c (mesh+analytic in sync); full-ellipsoid bulb (half y>=0 + mirror) seated overlapping tip; `bulb_vol [0.002,0.0065]` + downstream capacity violation (geometry stays buildable); unified floor + CB_x/electronics-bay inertia + chord-based keel mass; sheer-aware windage/deck/inverted paths; info-only JFR LDR/L/B/SA-D/Wb-DT monitors; final CAD prefers `hull_full.stl`; 17-dim legacy vectors pad flat.
+- **Verification:** `tests/test_plan_impl.py` (8 new) + `test_geometry/test_config` updated green; end-to-end `generate_hull` + `evaluate_constraints` shows bow kick (zmax 0.465 > E 0.34), monitors flow, bulb violation soft-gates new campaigns.
+- **Impact:** Config signature change → old DBs refuse (wipe for fresh campaign); old finalists re-score as bulb-undersized (expected — they were optimized under the infeasible stacking model).
+
+## Bug #164: Dead-flat deck directive + fleet-standard cutaway forefoot (21-dim)
+
+- **Files:** `hull_opt/config.py`, `hull_opt/param_layer.py`, `config.yaml/fast/phase0.yaml`, `hull_opt/geometry.py` (`FOREFOOT_EXTENT`, `_forefoot_factor`, control net / analytic / SAC `T_local`, `generate_hull` gate), `hull_opt/geometry_validator.py`, `hull_opt/constraints.py` (`forefoot_cut` info), `hull_opt/corrections.py` (MLP 21), `run_optimization.py` (report col, generic dim check), `tests/test_plan_impl.py` (flat ≤1e-6 + cutaway tests)
+- **Severity:** Medium (user-directed shape change; physics-grounded in fleet survey)
+- **Discovery:** User renders — kicked deck ends rejected (want 100% flat); square bow corner vs rounded stern quarter (red line); fleet research (Saildrone/Sailbuoy/Microtransat survivors).
+- **Root causes:**
+  1. Deck kick came from `sheer_bow/stern` bounds; optimizer bought reserve at ends to dodge the midship slab gate.
+  2. Bow corner square because both ends are `y=0` point columns at 70% `T_canoe` with no bottom-rise term; only topside rake/plan-floor existed.
+- **Fix:** sheer/rake bounds pinned `[0,0]` (deck flat to 0.000mm measured, 1e-6 test); new `forefoot_cut [0,0.6]` (fraction of local T removed at stem, fixed 0.20 LWL smoothstep extent, default anchor 0.35) applied identically in control net + analytic + SAC loop (net↔analytic sync preserved); legacy 17/20-dim vectors pad flat + full forefoot; reserve fallback is midship volume (BWL/Cp/Cm/T, fuller U) then E→0.40, never kick-back.
+- **Verification:** `test_flat_deck_stl_tolerance` (deck_err 0.0mm), `test_forefoot_cutaway` (bottom@10%LWL −0.166→−0.129 at cut 0.6), full `test_geometry/test_config/test_constraints/test_hydrostatics/test_database` green (90 passed).
+- **Impact:** Config signature change → wipe for fresh campaign; old DBs refuse by design.
+
+## Bug #166: Fallback Gate-5 passes + phantom tip ballast + free depth (two-sided depth pricing)
+
+- **Files:** `hull_opt/templates/dualsphysics.py` (`write_inverted_case`), `hull_opt/sph_resistance.py` (`run_inverted_pressure`), `hull_opt/hydrostatics.py` (`_ballast_struct_split`, `compute_cg_z/x`, `compute_lumped_inertia`), `hull_opt/geometry.py` (reporting split), `hull_opt/low_fidelity.py` (`draft_penalty_for`, light-wind T, FoM debit), `tests/test_plan_impl.py`, `docs/BUGS_FIXED.md`
+- **Severity:** High (campaign winner 157: T/L 0.91 on phantom ballast + unverified Gate 5)
+- **Discovery:** Post-campaign audit of the insane-mode run (167 designs, converged iter 166): all 3 top designs' Gate 5 = SPH AbortBoundOut -> analytic fallback; winner's 70 kg ballast stacked at bulb point vs 35 kg lead capacity; T/L 0.91 paid 4.9 into dead violation_magnitude, 0.0 into FoM.
+- **Root causes:**
+  1. Inverted tank mixed param extents (`-1.5*T_total` floor) with measured tip height; roll-swing radius (~1.2 m on 2.18 m hull) exceeded ~0.20 m wall headroom (def-box != domain); real `compute_cg_z` computed then dropped; fixed dp blew the 400k cap (~750k at 2.18 m).
+  2. `ballast_cg = -(T+D)` for ALL of `total*frac` even at 2x lead capacity; floor trimmed mass but never re-located it.
+  3. T/L penalty never reached feasible FoM; light-wind Michell excluded the fin; zero structural proxy for root bending (PYD Ch.13).
+- **Fix:**
+  1. Domain from measured STL bounds + dz_eq-first: walls cover tip+/-bob, floor covers post-roll tip, ymax covers swing radius R; adaptive dp (Bug #162 pattern); real CG + lumped inertia threaded through (`cg_z`, `inertia` params; box fallback kept). Verified: 2.18 m hull GenCase builds 218k fluid / 283k total < 400k cap.
+  2. `_ballast_struct_split`: cap-fit lead at bulb, excess mid-fin at -(T+D/2), shared by all 3 mass paths + reporting.
+  3. Light-wind Michell at T_canoe+D_keel (fin wetted at all speeds — was free ride).
+- **Verification:** `test_honest_ballast_split_vcg` green; measured Gate-5 rerun for 157/104/163 (all status OK, recorded in validation).
+- **Follow-up (Bug #168):** the feasible-path `draft_penalty_for` (0.15 quad + 8 cubic) and `m_struct = 0.035` coefficient added here were THEMSELVES tuned backwards from outcome targets ("dethrone 157", "~28 kg"). Removed/replaced — see next entry.
+
+## Bug #167: Reference-storm paddle ejection on narrow hulls + 5-min STL polls on infeasible designs + 2021° roll_sigma garbage
+
+- **Files:** `hull_opt/templates/dualsphysics.py` (`storm_domain`), `hull_opt/surrogate.py` (ReferenceRunner STL poll), `hull_opt/rapid_gates.py` (`_sigma_deg_capped`), `tests/test_plan_impl.py`
+- **Severity:** Medium (5/16 reference storms FAILED; audit-only data loss + GPU waste; garbage sigmas in DB/logs)
+- **Discovery:** Campaign post-mortem: ref_ds_41/91/121/141/161 all `AbortBoundOut`, all B=0.55; all B=0.68 passed.
+- **Root causes:**
+  1. `Error_BoundaryOut.vtk` plane at x=-3.744 + `Run.out` MapRealPos min -3.74384: the excluded body is the WAVE PADDLE, not the hull. Deterministic JONSWAP piston (seed 42) return stroke (~0.36 m in shallow transfer regimes) exceeds the fixed 0.35 m back pocket + kernel margin. Deep/wide cases survived by luck of transfer/timing, not margin.
+  2. ReferenceRunner polled 5 min for STLs of infeasible (E_GEOM) designs that never get geometry (designs 19/33) — enqueue is post-eval so `feasible` is final and checkable.
+  3. Near-undamped RAO resonance integrates to sigma 1455-2021°; stored raw although downstream tanh/gates already neutralized it.
+- **Fix:**
+  1. Pocket sized from Hs: `max(0.35, Hs+4dp)` in `storm_domain` (single source — particle estimator auto-syncs). Failing case pocket 0.35 -> 0.84 m; fetch cost ~0.5 m, particle cost absorbed by adaptive dp.
+  2. Drop `feasible==0` storms immediately, no poll.
+  3. `_sigma_deg_capped` (180°) at both sigma assignments; raw `_roll_sigma_rad` untouched.
+- **Verification:** failing-case storm regenerates (GenCase 210k particles < caps); full 10 s GPU solver rerun of design 41 via production `run_reference_storm`: status OK, zero aborts (old case died at t=1.12 s); campaign DB left intact (41 stays FAILED as run-record); `test_storm_paddle_pocket_scales_with_hs`, `test_sigma_deg_capped` green; `test_sph_gates` 26 passed; legacy `hyper_test`/`stress_test` dim asserts + `test_rao_surrogate` vectors made dimension-agnostic (17→21 rot); full suite 407 passed.
+
+## Bug #168: Outcome-tuned depth pricing (draft debit + 0.035 structure coefficient)
+
+- **Files:** `hull_opt/low_fidelity.py` (deleted `draft_penalty_for`), `hull_opt/hydrostatics.py` (`_ballast_struct_split` derived scantling + `config` thread-through), `hull_opt/config.py` (`structural_allowable_stress_pa`, `structural_density_kg_m3`), `config.yaml` (same + `max_total_draft_m: 3.05`), `hull_opt/constraints.py` (hard draft ceiling, `ballast_moment` info-only), `tests/test_plan_impl.py`, `docs/BUGS_FIXED.md`
+- **Severity:** High (FoM-shaping constants tuned backwards from outcome targets: "dethrone 157", "~28 kg")
+- **Discovery:** Self-audit of the Bug #166 fix: `draft_penalty_for` coefficients (0.15 quad + 8 cubic) were picked so T/L 0.91 costs ~3 FoM, and `m_struct = 0.035·ballast·D²/chord` was picked so the 157-like fin reads ~28 kg. Both are judgments labeled as derivations.
+- **Root causes:**
+  1. Transport/logistics priced as a per-Newton FoM tax instead of feasibility: a 10 ft user transport requirement is a hard ceiling, not a shaping curve.
+  2. Structure mass as a tuned coefficient instead of a scantling: PYD Ch.13 sizes the root from the bending moment, not from ballast·D².
+  3. `ballast_moment = frac·D` constraint reverse-engineered from `2.2·0.75 = 1.65` to bind the winner.
+- **Fix:**
+  1. Deleted `draft_penalty_for` — no feasible-path draft debit anywhere in FoM. Depth still prices honestly via GM/RE/AVS/drive benefits vs light-wind Michell at full draft + keel induced/added-wave drag. Transport = hard gate: `T_total > fixed.max_total_draft_m` (3.05 m) → infeasible.
+  2. `m_struct` DERIVED cantilever: `M = tip·g·D·safety`, `t = 6M/(σ·c²)`, `m = t·D·c·ρ`, centroid `-(T+2D/3)` (tapered laminate). σ/ρ from `fixed.structural_*` — carbon primary structure (600 MPa / 1600 kg/m³); layup = Kevlar outer (impact) + glass general + carbon structure + metal frame. Result: ~0.47 kg on the monster fin — carbon laminate is nearly free; the honest anti-depth costs are drag + logistics, stated openly with scope (skins only; floors/bolts/grounding excluded).
+  3. `ballast_moment` cap deleted; product recorded info-only. Fleet grounding for all of the above: PYD ballast 0.25–0.50, GM 10–15% LWL, AVS ~118° avg, STIX Cat A; USNA ~30° aft sweep + taper ≈0.45; Fanhai-T2 SIMP (mass −33%, CG −34 mm, sway −48%, roll −43%, resistance −37%) via layered lay-up stacking.
+- **Verification:** `test_struct_mass_calibration` (hand-checked derivation + carbon bands), `test_max_draft_hard_step` (3.05 m + `draft_penalty_for` gone — SUPERSEDED by Bug #169 below), `test_honest_ballast_split_vcg` green; `test_plan_impl.py` 16/16 pass; zero `frp_`/`draft_penalty_for`/`ballast_moment`-as-gate references left. Golden regen PROVEN honest: `tests/golden/metrics.json` re-recorded (design_0 fom −0.44→+0.94, rt 46.4→38.6 N — debit removal + 27 kg structure loss); clean-HEAD worktree reproduces the OLD golden exactly, so the delta is 100% working-tree (this bug's scope). Full suite (`-m "not slow"`): everything green except the golden, now fixed → `test_golden_smoke.py` 5/5 pass.
+
+## Bug #169: Single-point upwind-biased FoM + draft wall (mission mis-scoring)
+
+- **Files:** `hull_opt/balance.py` (`tws_ops_kt` param, `reach_drive_ops_N`), `hull_opt/low_fidelity.py` (mission bands, gust reward, VMG leeway, logistics cost, helpers), `hull_opt/constraints.py` (wall → priced), `hull_opt/config.py` + `config.yaml/fast/phase0` (band weights, `w_mission_drive/gust/leeway`, `draft_free_m/logistics_per_m`; `max_total_draft_m` DELETED), `tests/test_plan_impl.py`, `scripts/rescore_mission.py`
+- **Severity:** High (campaign learned stubby keels under rigged scoring; user mission = ocean crossing, mostly reach/run, gust-ready; draft = inconvenience-with-price per user directive)
+- **Discovery:** User asked why validated top-3 wear bound-pinned stubby fins (D_keel = 0.45 m lower bound) while honest rescore puts deep 133 (D = 1.58 m) top-3; plain-English review confirmed the FoM scored one upwind-ish point + light bonus, saturated the drive/storm bonuses via tanh, capped leeway at 0.2, and walled draft at 3.05 m.
+- **Root causes:**
+  1. One wind point (10 kt) + light bonus priced a mission the boat never sails; reach/run drive (the actual ocean-crossing work) entered only via saturated `0.6·tanh`.
+  2. Gust readiness gated but never rewarded — 30° survival headroom scored = 1° headroom (saturated 0.4 tanh).
+  3. Leeway > 6° cost at most 0.2 — crabbing at 9° nearly free.
+  4. Draft wall contradicted the user's stated preference (price, not limit).
+- **Fix:**
+  1. Three bands through the SAME solver (5/10/22 kt × 0.25/0.45/0.30): reach-drive (TWA 90/135/180) per band vs Rt, `w_mission_drive`. Stored `result.balance` stays the 10 kt call — gates + DB keys untouched. Per-band boat speeds (user: 5 kt max): drift 2.0 / work 3.5 / breeze-on 5.0 kt (`band_light_kt`, `target_speed_knots`, `band_heavy_kt=max_speed_knots`) — heavy band at Fn ~0.53, past the 0.45 barrier, priced honestly.
+  2. `w_gust` × heavy-band heel margin (real gradient, replaces storm tanh); upwind VMG kept for shifts.
+  3. `leeway_penalty_deg` helper: linear past the 4° PYD norm, `w_leeway` slope (replaces 0.2 token).
+  4. `draft_logistics_cost` helper: free under `draft_free_m` 1.0 m, linear rate above (stated judgment); only T_total > LWL fails (physical RealityCheck cap).
+  5. All weights/judgments in all 4 config files; helpers pure + unit-tested with ±50% sensitivity probes. Mission scalars persisted to constraint_values → results.md/CSV columns (`test_mission_columns_reach_report`) — production runs can see what the FoM rewarded.
+- **Verification:** `test_mission_bands_and_leeway` + `test_draft_priced_not_walled` green (17/17 plan_impl); golden re-recorded under mission FoM with physics-identical signature (Rt/GM/RE/cg UNCHANGED, fom 0.94→1.62 — pure scoring delta, exactly as designed); `scripts/rescore_mission.py` added for DB-read-only audit rescores.
+
+## Bug #170: Campaign DB silently wiped by a fresh-run wipe (unrecoverable data loss)
+
+- **Files:** `run_optimization.py` (`_clean_slate`), `tests/test_sph_lock.py`, `output/` (restored by user from backup)
+- **Severity:** Critical (160-design campaign DB + all design dirs deleted mid-session 2026-09-05; DB file left 0 bytes; cause unproven — no default-suite test calls the wiper on `./output`, no stray processes found)
+- **Discovery:** Rescore script hit `no such table: designs`; `output/` held only the empty DB. Other on-disk DBs are older campaigns (160-design Aug-25, 39-design) — the 167-design run itself had no second copy.
+- **Fix:** `_clean_slate` NEVER unlinks a DB holding designs (or an unreadable/oversize DB — assumed precious): it moves DB+WAL+SHM to `output/.backup_<ts>/` and logs loudly. Empty DBs still clean as before (existing tests unchanged).
+- **Verification:** `test_clean_slate_backs_up_campaign_db` green (7/7 sph_lock); lesson recorded in AGENTS.md wipe-hygiene note. Standing rule: never point a fresh run at a live campaign dir without --resume; keep an offline DB copy before mode switches.
+
+## Bug #171: Audit findings — dead survival gates, lost spectral fix, leaky cap, AVS/CLR/mass errors
+
+- **Files:** `hull_opt/constraints.py` (reserve latch), `hull_opt/rapid_gates.py` + `hull_opt/low_fidelity.py` (JONSWAP), `hull_opt/michell.py` + call sites (`delft_cap_frac`, true cap), `hull_opt/hydrostatics.py` (AVS, centroid), `hull_opt/geometry.py` (payload closure), `hull_opt/rig.py` (CLR), `hull_opt/param_layer.py` (fallbacks), `tests/test_plan_impl.py`, `tests/test_param_layer_coupling.py`
+- **Severity:** Critical (2 items) + High (rest). Found by 4 adversarial subagents reading every line against JFR/PYD-5/Fanhai-T2, with the 2 criticals hand-verified in code.
+- **P0 — survival correctness:**
+  1. `reserve_fatal` overwrite: `else: reserve_fatal = False` cleared RE/self-right/accel fatals whenever reserve passed — unsurvivable designs scored feasible. Now latches (never cleared). Pinned by `test_reserve_fatal_latches`.
+  2. JONSWAP alpha: Bug #71's fix (5/16→0.0081) never reached code (squashed history). Autopsy went further: 0.0081 belongs to the g² spectrum form — in this Hs² form NO constant is right, so both spectra now self-normalize to m0=(Hs/4)² (exact by definition of Hs, any sea state). Pinned by `test_jonswap_alpha_phillips` over 3 sea states.
+- **P1 — honest water:**
+  3. AVS was argmax-seeded: a dominant inverted lobe returned 180° despite a ~110° first crossing. Now scans from the first positive sample (`test_avs_first_crossing`).
+  4. Michell cap leaked (`max(cap, 0.05·Rw)` — spikes over 20× cap paid 5% unbounded) and was Fn-flat with inconsistent 0.035/0.02 pair. Now TRUE `min(Rw,cap)` with `delft_cap_frac(Fn)` from PYD printed bands (0.4%@0.30 → 5%@0.45, last-band above validity, stated).
+  5. Added-wave was linear in Hs (2× over at moderate seas); now Hs².
+  6. CLR omitted T_canoe (6% LWL fwd error vs a 0.5% gate) and mis-anchored the root LE (0.4kc vs meshed 0.65kc): now waterline-extended `0.45·(T+D)` from the meshed 25%-chord root.
+  7. `param_layer` no-config fallbacks decoded a different boat (D_keel capped 0.65, bulb 0.004, flare/deadrise/bilge/wingsail/sheer all stale): now mirror live bounds (bulb geometric shrink excepted, by design). `test_fallback_bounds_match_config` + updated `test_bulb_vol_decouple_when_config_none` (it had pinned the rot).
+  8. Reporting mass light by the 15 kg payload vs the CG path (mass non-closure): geometry base now includes payload. Structure centroid corrected to root-heavy −(T+D/3) (was tip-heavy −(T+2D/3); sub-kg effect, fixed for the derivation's honesty).
+- **Verification:** 23/23 plan_impl; golden re-recorded with honest signature (Rt 38.6→24.6 N via Fn cap, storm accel 2.24→1.81 g via normalization, GM/RE/CG unchanged); top-8 rescore under fixed physics re-ranks 152→#1 (6.248), 158→#2 (5.879), 124→#3 (5.790); fast suite green modulo the one pinned-rot test, fixed.
+- **Known open (P2, not this bug):** rig CL double-discount + CE height, Oswald/end-plate factors, Gate 1/4 pass-by-construction thresholds, helm 5° unenforced, Fanhai % cited-not-enforced, AGENTS drift items (NURBS default, SAC cap, thresholds, fast/phase0 weights).

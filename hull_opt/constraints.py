@@ -136,13 +136,22 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
         E_val = float(x_dict.get("E", 0.0))
         flare_val = float(x_dict.get("flare", 0.0))
         if E_val > 1e-6 and flare_val > 1e-6:
-            from hull_opt.geometry import _topside_wall_angle as _tw
+            from hull_opt.geometry import _topside_wall_angle as _tw, _sheer_height as _sh
+            sb = float(x_dict.get("sheer_bow", 0.0)); ss = float(x_dict.get("sheer_stern", 0.0))
             # Estimate deck beam at midship (x_norm≈0.5) where flare is maximal
             y_wl_mid = B / 2.0  # approx midship WL half-beam before scaling
-            fl_mid = _tw(0.5, flare_val, B, E_val, y_wl_mid)
-            deck_half = (y_wl_mid + E_val * np.tan(fl_mid)) * sac_scale ** 0.5  # y+z volumetric -> sqrt
+            zsh_mid = _sh(0.5, E_val, sb, ss)
+            fl_mid = _tw(0.5, flare_val, B, E_val, y_wl_mid, zsh_mid)
+            deck_half = (y_wl_mid + zsh_mid * np.tan(fl_mid)) * sac_scale ** 0.5  # y+z volumetric -> sqrt
             deck_beam_L = (2.0 * deck_half) / max(1e-10, LWL)
             constraints["deck_beam_L"] = deck_beam_L
+            # Bow kick raises reserve without tripping midship slab gate: sample bow too (info-only)
+            zsh_bow = _sh(0.05, E_val, sb, ss)
+            constraints["sheer_bow_m"] = sb
+            constraints["sheer_stern_m"] = ss
+            constraints["stem_rake_deg"] = float(x_dict.get("stem_rake_deg", 0.0))
+            constraints["forefoot_cut"] = float(x_dict.get("forefoot_cut", 0.35))
+            constraints["z_sheer_bow_m"] = zsh_bow
             if deck_beam_L > (0.50 + relaxation * 0.10):
                 max_deck = 0.50 + relaxation * 0.10
                 viol = deck_beam_L - max_deck
@@ -324,14 +333,11 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
             violations.append(f"keel_AR={keel_ar:.3f} > {ar_upper:.2f}")
             violation_magnitude += viol * 0.5
 
-        # Ballast moment: allow deep keel 2.2*0.75=1.65 for righting, was 0.75 cap for 1.2m
-        ballast_moment = ballast_frac * D_keel
-        constraints["ballast_moment"] = ballast_moment
-        max_bm = 1.65 + relaxation * 0.30  # start at 1.95, tighten to 1.65
-        if ballast_moment > max_bm + 1e-9:
-            viol = ballast_moment - max_bm
-            violations.append(f"ballast_moment={ballast_moment:.3f} > {max_bm:.2f}")
-            violation_magnitude += viol * 0.5
+        # Bug #168: ballast_moment cap DELETED. It was reverse-engineered
+        # from "allow 2.2*0.75=1.65" — an admissibility target, not physics.
+        # Ballast is genuinely constrained by AVS/RE/GM gates + bulb fit,
+        # which all still apply. Record the product as info only.
+        constraints["ballast_moment"] = ballast_frac * D_keel
 
         # Bilge radius vs beam: prevent extreme bilge radius causing bulging sections
         bilge_r = x_dict.get("bilge_r", 0.0)
@@ -350,6 +356,32 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
             viol = min_ballast - ballast_frac
             violations.append(f"ballast_ratio={ballast_frac:.3f} < {min_ballast:.2f}")
             violation_magnitude += viol * 3.0
+        # Bulb capacity: lead must fit in the bulb (PYD ballast-IN-bulb).
+        # Demand from TRUE displacement (measured underwater volume, else
+        # target_displacement — never the raw box, which overstates mass
+        # 2-3x) + rig/payload from config.fixed. Undersized bulbs accumulate
+        # violation so new campaigns size the bulb honestly.
+        try:
+            _uw = hydro.get("underwater_volume", hydro.get("nabla", 0.0))
+            if _uw is not None and np.isfinite(_uw) and _uw > 0:
+                _tgt = float(_uw)
+            elif config is not None:
+                _tgt = float(config.fixed.target_displacement)
+            else:
+                _tgt = 0.10
+            _mast = 10.0 if config is None else float(
+                config.fixed.wingsail_mast_mass + config.fixed.wingsail_nose_pod_mass)
+            _pay = 15.0 if config is None else float(config.fixed.payload_mass_kg)
+            _cap_base = _tgt * 1025.0 + _mast + _pay
+            _need = ballast_frac * max(_cap_base, 40.0)
+            _have = float(x_dict.get("bulb_vol", 0.0)) * 11340.0
+            constraints["bulb_capacity_kg"] = _have
+            constraints["ballast_need_kg"] = _need
+            if _need > _have + 1e-9:
+                violations.append(f"bulb undersized: need {_need:.1f}kg > cap {_have:.1f}kg")
+                violation_magnitude += (_need - _have) / max(10.0, _have) * 2.0
+        except Exception:
+            pass
 
     if x_dict is not None and config is not None and (stl_path is not None or hull_stl_path is not None):
         reserve = compute_reserve_buoyancy(stl_path, x_dict)
@@ -361,16 +393,10 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
             violation_magnitude += viol * 3.0
             # SURVIVAL-CRITICAL: reserve buoyancy is the energy that rightes
             # the boat after a knockdown — below minimum is not survivable.
-            # The only appended violation that revokes feasibility (all other
-            # penalties are FoM-shaping signals; fatal geometry cases already
-            # returned False above). Root cause of 0-feasible campaigns was
-            # `feasible = len(violations) == 0` treating soft penalties
-            # (sac_scale_std, Cp floating penalty, soft storm gates) as
-            # fatal — every design came back infeasible and the optimizer
-            # had no gradient.
+            # Bug #171: latch ONLY — never clear. An earlier `else:
+            # reserve_fatal = False` wiped fatals set by righting-energy /
+            # self-right / accel above, marking unsurvivable designs feasible.
             reserve_fatal = True
-        else:
-            reserve_fatal = False
 
         # Downflooding: vessel is fully enclosed/watertight - skip this check
         # df_angle is still computed for info but never triggers a violation
@@ -395,7 +421,13 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
             violations.append(f"equilibrium heel={eq_heel:.1f}° > {max_eq_heel:.0f}° with feathered wings")
             violation_magnitude += viol / max(45.0, 1e-6)
 
-        # ── Draft / debris robustness (Review §3.3.1: T/L band 0.15-0.3) ─
+        # ── Draft: info + soft T/L shaping + priced inconvenience ──
+        # T/L>0.30 accumulates soft violation (JFR band label; slope is a
+        # judgment, stated). Bug #169 (user directive): draft is an
+        # INCONVENIENCE WITH A PRICE, not a wall — benefits can outweigh
+        # handling cost, so over-deep is never infeasible for logistics.
+        # The price lives in FoM (draft_logistics_cost, low_fidelity.py).
+        # Only hard draft failure left: T_total > LWL (physical RealityCheck).
         t_total = x_dict["T_canoe"] + x_dict["D_keel"]
         t_over_l = t_total / max(1e-9, LWL)
         constraints["T_over_L"] = t_over_l
@@ -404,6 +436,29 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
             ex = t_over_l - 0.30
             violations.append(f"T/L={t_over_l:.2f} > 0.30 (draft {t_total:.2f} m — launch/debris risk)")
             violation_magnitude += 8.0 * ex
+        if t_total > LWL + 1e-9:
+            return False, [f"total draft={t_total:.2f} m > LWL={LWL:.2f} m (physical cap)"], \
+                constraints, violation_magnitude + 4.0
+
+        # ── JFR envelope monitors (info-only: LDR, L/B, SA/D, Wb/DT) ──
+        try:
+            nabla_info = hydro.get("underwater_volume", hydro.get("nabla", 0.0))
+            if nabla_info and np.isfinite(nabla_info) and nabla_info > 0:
+                constraints["LDR"] = LWL / (nabla_info ** (1.0 / 3.0))
+                B_ac = B * sac_scale
+                constraints["L_over_B"] = LWL / max(1e-9, B_ac)
+                try:
+                    constraints["SA_over_D"] = rig["area"] / max(1e-9, (nabla_info ** (2.0 / 3.0)))
+                except Exception:
+                    pass
+                try:
+                    tot_m = nabla_info * 1025.0 + float(getattr(config.fixed, "payload_mass_kg", 0.0)) \
+                        + float(config.fixed.wingsail_mast_mass + config.fixed.wingsail_nose_pod_mass)
+                    constraints["Wb_over_DT"] = (hydro.get("bulb_mass_kg", 0.0) + hydro.get("ballast_mass_kg", 0.0)) / max(1e-9, tot_m)
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
         # ── Wingsail helm balance: SIGNED lead hard gate ───────────────
         # PYD Ch.9: hydrodynamic CLR on the extended keel (25%-chord line at

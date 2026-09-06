@@ -17,12 +17,31 @@ class OptimizationDatabase:
         self.db_path = str(Path(db_path).resolve())
         db_parent = Path(self.db_path).parent
         db_parent.mkdir(parents=True, exist_ok=True)
-        # Clean stale WAL/SHM files from aborted runs
-        for sfx in ["-wal", "-shm"]:
-            (db_parent / f"{Path(self.db_path).name}{sfx}").unlink(missing_ok=True)
-        self._conn = sqlite3.connect(self.db_path)
+        # Clean stale WAL/SHM files from aborted runs — but ONLY when no
+        # other process holds the DB (Bug #165: a second run wiped output/
+        # while the first was mid-write, then unlinked live WAL files).
+        import fcntl as _fc
+        _probe = None
+        try:
+            _probe = open(self.db_path + ".gclock", "w")
+            _fc.flock(_probe, _fc.LOCK_EX | _fc.LOCK_NB)
+            for sfx in ["-wal", "-shm"]:
+                (db_parent / f"{Path(self.db_path).name}{sfx}").unlink(missing_ok=True)
+            _fc.flock(_probe, _fc.LOCK_UN)
+        except BlockingIOError:
+            pass
+        finally:
+            if _probe is not None:
+                try:
+                    _probe.close()
+                except Exception:
+                    pass
+        self._conn = sqlite3.connect(self.db_path, timeout=30.0,
+                                     check_same_thread=False, isolation_level=None)
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL")
+        self._conn.execute("PRAGMA busy_timeout=30000")
+        self._conn.execute("PRAGMA synchronous=NORMAL")
         self._create_tables()
         # Scrub stale 'running' calibration attempts from crashed runs: the
         # selector excludes 'running' rows, so a crash mid-calibration would

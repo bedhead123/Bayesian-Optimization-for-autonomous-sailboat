@@ -32,13 +32,22 @@ def bulb_vol_max_for(keel_chord: float) -> float:
 
 
 def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
-    """Convert 18-element raw GP vector to physical hull parameters.
+    """Convert 20-element raw GP vector to physical hull parameters.
 
     The raw vector lives in roughly [-10, +10] (unbounded). Each element is
     squashed/transformed to a physically valid hull parameter. LWL is the
     master scale (Rule 1). All other dimensions are ratios to LWL.
     """
-    r = raw  # shorthand
+    r = np.asarray(raw, dtype=float).ravel()
+    # Backward compat: pre-sheer 17-dim vectors decode with flat deck +
+    # default forefoot cut; 20-dim pre-cutaway vectors pad the cut default.
+    # Pinned [0,0] bounds decode to exactly 0 regardless of raw.
+    if r.shape[0] == 17:
+        r = np.concatenate([r, np.full(4, -10.0)])
+    elif r.shape[0] == 20:
+        r = np.concatenate([r, np.full(1, -10.0)])
+    if r.shape[0] != 21:
+        raise ValueError(f"Raw design vector must be 17 (legacy), 20 (pre-cutaway) or 21 elements, got {r.shape[0]}")
 
     # ── Master scale ────────────────────────────────────────────────
     # LWL stays as-is but bounded via sigmoid (Rule 2)
@@ -46,17 +55,17 @@ def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
     LWL = lwl_lo + (lwl_hi - lwl_lo) * sigmoid(r[0])
 
     # ── Ratios to LWL (Rule 1: Shape Genes) ─────────────────────────
-    bwl_lo, bwl_hi = (0.40, 0.60) if config is None else config.bounds.BWL
+    bwl_lo, bwl_hi = (0.55, 0.68) if config is None else config.bounds.BWL
     BWL = bwl_lo + (bwl_hi - bwl_lo) * sigmoid(r[1])
 
-    t_lo, t_hi = (0.15, 0.35) if config is None else config.bounds.T_canoe
+    t_lo, t_hi = (0.28, 0.36) if config is None else config.bounds.T_canoe
     T_canoe = t_lo + (t_hi - t_lo) * sigmoid(r[2])
 
     # Cp, Cm are dimensionless [0,1] coefficients (Rule 5: bounded by physics)
-    cp_lo, cp_hi = (0.55, 0.65) if config is None else config.bounds.Cp
+    cp_lo, cp_hi = (0.55, 0.60) if config is None else config.bounds.Cp
     Cp = cp_lo + (cp_hi - cp_lo) * sigmoid(r[3])
 
-    cm_lo, cm_hi = (0.60, 0.90) if config is None else config.bounds.Cm
+    cm_lo, cm_hi = (0.78, 0.90) if config is None else config.bounds.Cm
     Cm = cm_lo + (cm_hi - cm_lo) * sigmoid(r[4])
 
     # LCB is fraction of LWL (Rule 1)
@@ -64,7 +73,7 @@ def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
     LCB = lcb_lo + (lcb_hi - lcb_lo) * sigmoid(r[5])
 
     # Keel depth as ratio of LWL (Rule 1)
-    dk_lo, dk_hi = (0.45, 0.65) if config is None else config.bounds.D_keel
+    dk_lo, dk_hi = (0.45, 2.50) if config is None else config.bounds.D_keel
     D_keel = dk_lo + (dk_hi - dk_lo) * sigmoid(r[6])
 
     # Keel chord as ratio of LWL (Rule 1)
@@ -76,7 +85,7 @@ def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
     # lines 991-998), so the effective upper bound shrinks with keel_chord:
     # the sigmoid then saturates AT the geometric max instead of being
     # silently clipped past it.
-    bv_lo, bv_hi = (0.0015, 0.004) if config is None else config.bounds.bulb_vol
+    bv_lo, bv_hi = (0.002, 0.0065) if config is None else config.bounds.bulb_vol
     if config is not None:
         bv_hi = max(bv_lo, min(bv_hi, bulb_vol_max_for(keel_chord)))
     bulb_vol = bv_lo + (bv_hi - bv_lo) * sigmoid(r[8])
@@ -86,19 +95,19 @@ def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
     bulb_pos = bp_lo + (bp_hi - bp_lo) * sigmoid(r[9])
 
     # Sheer parameters as ratios of LWL (Rule 1)
-    e_lo, e_hi = (0.15, 0.30) if config is None else config.bounds.E
+    e_lo, e_hi = (0.28, 0.40) if config is None else config.bounds.E
     E = e_lo + (e_hi - e_lo) * sigmoid(r[10])
 
     # Flare angle - squashed (Rule 2), bounded by tan(flare) < beam/draft (Rule 5)
-    fl_lo, fl_hi = (8.0, 15.0) if config is None else config.bounds.flare
+    fl_lo, fl_hi = (10.0, 24.0) if config is None else config.bounds.flare
     flare = fl_lo + (fl_hi - fl_lo) * sigmoid(r[11])
 
     # Deadrise angle - squashed (Rule 2)
-    dr_lo, dr_hi = (5.0, 25.0) if config is None else config.bounds.deadrise
+    dr_lo, dr_hi = (16.0, 28.0) if config is None else config.bounds.deadrise
     deadrise = dr_lo + (dr_hi - dr_lo) * sigmoid(r[12])
 
     # Bilge radius - squashed (Rule 2), max 50% of BWL (Rule 5)
-    br_lo, br_hi = (0.05, 0.30) if config is None else config.bounds.bilge_r
+    br_lo, br_hi = (0.18, 0.30) if config is None else config.bounds.bilge_r
     bilge_r = br_lo + (br_hi - br_lo) * sigmoid(r[13])
 
     # Keel rake angle - squashed (Rule 2), DEGREES (geometry uses deg2rad)
@@ -110,8 +119,26 @@ def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
     ballast_frac = bf_lo + (bf_hi - bf_lo) * sigmoid(r[15])
 
     # Wingsail mast position as fraction of LWL from bow (Rule 1)
-    wp_lo, wp_hi = (0.30, 0.55) if config is None else config.bounds.wingsail_pos
+    wp_lo, wp_hi = (0.30, 0.75) if config is None else config.bounds.wingsail_pos
     wingsail_pos = wp_lo + (wp_hi - wp_lo) * sigmoid(r[16])
+
+    # Bow sheer rise above E (m) — PINNED [0,0] flat-deck directive (fallback mirrors config)
+    sb_lo, sb_hi = (0.0, 0.0) if config is None else config.bounds.sheer_bow
+    sheer_bow = sb_lo + (sb_hi - sb_lo) * sigmoid(r[17])
+
+    # Stern sheer rise above E (m)
+    ss_lo, ss_hi = (0.0, 0.0) if config is None else config.bounds.sheer_stern
+    sheer_stern = ss_lo + (ss_hi - ss_lo) * sigmoid(r[18])
+
+    # Stem rake from vertical (deg, +aft) — topsides only, underwater unchanged.
+    # PINNED [0,0]: dead-flat deck directive (all decode to exactly 0).
+    sr_lo, sr_hi = (0.0, 0.0) if config is None else config.bounds.stem_rake_deg
+    stem_rake_deg = sr_lo + (sr_hi - sr_lo) * sigmoid(r[19])
+
+    # Forefoot cutaway (fraction of local T removed at stem, fleet-standard
+    # transoceanic rocker; 0 = legacy full forefoot). Fixed 0.20 LWL extent.
+    fc_lo, fc_hi = (0.0, 0.6) if config is None else config.bounds.forefoot_cut
+    forefoot_cut = fc_lo + (fc_hi - fc_lo) * sigmoid(r[20])
 
     return {
         "LWL": float(LWL),
@@ -131,6 +158,10 @@ def design_vector_to_physical(raw: np.ndarray, config=None) -> dict:
         "keel_rake": float(keel_rake),
         "ballast_frac": float(ballast_frac),
         "wingsail_pos": float(wingsail_pos),
+        "sheer_bow": float(sheer_bow),
+        "sheer_stern": float(sheer_stern),
+        "stem_rake_deg": float(stem_rake_deg),
+        "forefoot_cut": float(forefoot_cut),
     }
 
 
@@ -140,7 +171,7 @@ def flattened_bounds(config=None) -> list[tuple[float, float]]:
     The raw GP operates in unbounded space. We keep a nominal [-10, +10]
     range for numerical stability of the acquisition function.
     """
-    n_params = 17
+    n_params = 21
     return [(-10.0, 10.0) for _ in range(n_params)]
 
 
@@ -191,6 +222,10 @@ def physics_anchor(config) -> dict:
     keel_rake_est = 22.0
     bulb_vol_est = 0.002
     bulb_pos_est = 0.40
+    sheer_bow_est = 0.0
+    sheer_stern_est = 0.0
+    stem_rake_est = 0.0
+    forefoot_cut_est = 0.35
     
     return {
         "LWL": LWL_est, "BWL": BWL_est, "T_canoe": T_canoe_est,
@@ -200,5 +235,7 @@ def physics_anchor(config) -> dict:
         "E": E_est, "flare": flare_est,
         "deadrise": deadrise_est, "bilge_r": bilge_r_est,
         "keel_rake": keel_rake_est, "ballast_frac": ballast_est,
-        "wingsail_pos": 0.42,
+        "wingsail_pos": 0.42, "sheer_bow": sheer_bow_est,
+        "sheer_stern": sheer_stern_est, "stem_rake_deg": stem_rake_est,
+        "forefoot_cut": forefoot_cut_est,
     }

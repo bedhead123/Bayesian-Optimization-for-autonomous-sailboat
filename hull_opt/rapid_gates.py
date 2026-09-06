@@ -58,11 +58,21 @@ def _jonswap_spectrum(Hs, Tp, gamma, n_freq, omega_min, omega_max):
         if fi <= 0:
             continue
         sigma = 0.07 if fi <= fp else 0.09
-        alpha = 5.0 / 16.0
+        # Bug #171 (and Bug #71 autopsy): the 0.0081 Phillips constant
+        # belongs to the g^2 spectrum form; in this Hs^2 form NO constant
+        # alpha is right for all sea states — so the spectrum is
+        # self-normalized below to m0 = (Hs/4)^2 (exact by definition of
+        # Hs), killing the whole constant debate for any Hs/Tp/gamma.
+        alpha = 0.0081
         beta = -1.25 * (fp / fi) ** 4
         gamma_term = gamma ** np.exp(-0.5 * ((fi - fp) / (sigma * fp)) ** 2)
         S_Hz[i] = alpha * Hs ** 2 * (fp / fi) ** 4 * np.exp(beta) * gamma_term / fi
-    return S_Hz / (2.0 * np.pi), omega_sp
+    S = S_Hz / (2.0 * np.pi)
+    _m0 = float(np.trapezoid(S, omega_sp)) if len(omega_sp) > 1 else 0.0
+    _tgt = (float(Hs) / 4.0) ** 2
+    if _m0 > 0 and np.isfinite(_m0):
+        S = S * (_tgt / _m0)
+    return S, omega_sp
 
 
 def _peak_accel_from_raos(heave_rao, pitch_rao, omega_bem, Hs, Tp, gamma,
@@ -89,6 +99,16 @@ def _roll_sigma_rad(roll_rao, omega_bem, Hs, Tp, gamma, n_freq):
     r = np.interp(omega_sp, omega_bem, roll_rao, left=0, right=0)
     m0 = _trapz((r ** 2) * S, omega_sp)
     return float(np.sqrt(max(0.0, m0)))
+
+
+def _sigma_deg_capped(sigma_rad: float) -> float:
+    """Roll std-dev in degrees, capped at the physical 180° (Bug #167).
+
+    A near-undamped RAO resonance integrates to non-physical sigma
+    (observed 1455-2021°); beyond 180° the number carries no information,
+    so clamp it instead of storing garbage that poisons GP targets/plots.
+    """
+    return min(float(np.degrees(sigma_rad)), 180.0)
 
 
 def _storm_wind_heel(x_dict, gz_curve, hydro, config):
@@ -348,8 +368,8 @@ def _storm_bem_sweep(stl_path, config, x_dict, hydro, design_vector=None, surrog
 
             beam_result = {
                 "storm_peak_accel_g": peak_accel,
-                "roll_sigma_deg": np.degrees(roll_sigma),
-                "roll_sigma_ops_deg": np.degrees(roll_sigma_ops),
+                "roll_sigma_deg": _sigma_deg_capped(roll_sigma),
+                "roll_sigma_ops_deg": _sigma_deg_capped(roll_sigma_ops),
                 "roll_period_s": roll_period,
                 "all_headings_rao": all_headings_rao,
             }
@@ -422,7 +442,8 @@ def _inverted_pressure(stl_path, x_dict, config):
             mesh = mesh.dump(concatenate=True)
         deck_z = float(mesh.vertices[:, 2].max())
     except Exception:
-        deck_z = x_dict.get("E", 0.2)
+        sb = float(x_dict.get("sheer_bow", 0.0)); ss = float(x_dict.get("sheer_stern", 0.0))
+        deck_z = float(x_dict.get("E", 0.2)) + 0.5 * sb + 0.3 * ss
     hydro_pressure = config.fixed.rho_water * config.fixed.gravity * max(0.0, deck_z)
     storm_wind_ms = config.validation.storm_wind_speed_knots * 0.514444
     gust = 1.3

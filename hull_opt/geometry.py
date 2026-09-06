@@ -106,7 +106,13 @@ def _check_control_net_curvature(ctrl: np.ndarray) -> tuple[bool, str]:
 
 def design_vector_to_dict(x: np.ndarray) -> dict:
     names = design_vector_names()
-    return {n: float(x[i]) for i, n in enumerate(names)}
+    arr = np.asarray(x, dtype=float).ravel()
+    # Backward compat: legacy vectors decode with full forefoot (cut 0).
+    if arr.shape[0] == 17:
+        arr = np.concatenate([arr, np.zeros(4)])
+    elif arr.shape[0] == len(names) - 1 == 20:
+        arr = np.concatenate([arr, np.zeros(1)])
+    return {n: float(arr[i]) for i, n in enumerate(names)}
 
 
 def mesh_displacement(mesh, z: float = 0.0) -> float:
@@ -392,14 +398,21 @@ def _build_keel_patch(x_dict: dict) -> Optional[NURBSPatch]:
     n_v = 8
     ctrl = np.zeros((n_u, n_v, 3))
     v_positions = np.linspace(0.0, 1.0, n_v)
-    thickness = BWL * 0.06
+    # PYD §6: t/c ~12% of local chord (was BWL-coupled, 23% at wide/short corner)
     for j, vf in enumerate(v_positions):
         z_pos = root_z + vf * (tip_z - root_z)
         frac = vf
         local_chord = keel_chord * (1.0 - 0.5 * frac)
         taper = 1.0 - 0.5 * frac
-        half_thick = 0.5 * thickness * taper
-        sweep_shift = (z_pos - root_z) * np.tan(sweep_rad)
+        # Root fillet: blend into hull bottom (JFR filleted transition)
+        if vf < 0.25:
+            fil = 1.0 + 0.30 * (1.0 - vf / 0.25)
+            local_chord *= fil
+        half_thick = 0.5 * (keel_chord * 0.12) * taper
+        if vf < 0.25:
+            half_thick *= 1.0 + 0.50 * (1.0 - vf / 0.25)
+        # Aft sweep: +rake drives tip aft (+x, stern=+LWL) for debris shedding
+        sweep_shift = (root_z - z_pos) * np.tan(sweep_rad)
         x_start = -local_chord / 2.0 + sweep_shift + keel_x_pos
         # 4 chordwise control points: LE, max-thickness region, mid, TE
         xi = np.array([0.0, 0.3, 0.6, 1.0])
@@ -447,19 +460,22 @@ def _build_bulb_patch(x_dict: dict) -> Optional[NURBSPatch]:
     vol_compensated = bulb_vol / (x_scale * z_scale)
     r = (3 * vol_compensated / (4 * np.pi)) ** (1.0 / 3.0)
     sweep_rad = np.deg2rad(keel_rake)
-    x_c = -D_keel * np.tan(sweep_rad) + keel_x_pos
-    z_c = -hull_draft_at_keel - D_keel
+    # Aft-swept: tip moves +x (stern) with depth — matches rig CLR convention
+    x_c = D_keel * np.tan(sweep_rad) + keel_x_pos
+    # Seat bulb so its top third overlaps the fin tip (no point contact)
+    z_c = -hull_draft_at_keel - D_keel + 0.35 * r * z_scale
 
-    n_u = 6
+    n_u = 8
     n_v = 6
     ctrl = np.zeros((n_u, n_v, 3))
-    # Spherical control net (quadrant), then scale
+    # Half-ellipsoid (y>=0, full fore-aft + top-bottom); tessellator y-mirrors
+    # to a closed full ellipsoid. Spherical param then axial scales.
     u_pos = np.linspace(0.0, 1.0, n_u)
     v_pos = np.linspace(0.0, 1.0, n_v)
     for i, uf in enumerate(u_pos):
-        theta = np.pi * uf * 0.5
+        theta = np.pi * uf  # 0..pi pole-to-pole (z+ -> z-)
         for j, vf in enumerate(v_pos):
-            phi = np.pi * vf * 0.5
+            phi = np.pi * vf  # 0..pi, sin>=0 -> y>=0 half
             xb = r * np.sin(theta) * np.cos(phi)
             yb = r * np.sin(theta) * np.sin(phi)
             zb = r * np.cos(theta)
@@ -914,23 +930,25 @@ TOPSIDE_MAX_DEG = 45.0
 
 
 def _topside_wall_angle(x_norm: float, flare_deg: float, BWL: float,
-                        E: float, y_wl: float) -> float:
+                        E: float, y_wl: float, sheer_h: float = None) -> float:
     """Effective topside wall angle (rad) above the waterline at station x_norm.
 
-    The deck edge sits at max(waterline edge + E·tan(flare·bow_amp),
+    The deck edge sits at max(waterline edge + H·tan(flare·bow_amp),
     bow deck floor); the wall runs straight from (z=0, y_wl) to
-    (z=E, y_deck), so the effective angle folds the bow floor in.  Used by
+    (z=H, y_deck), so the effective angle folds the bow floor in.  Used by
     both the control net and the analytic half-breadth so the mesh and the
-    Michell/BEM hull always agree.
+    Michell/BEM hull always agree. H defaults to E (legacy flat deck).
     """
+    H = float(E) if sheer_h is None else float(sheer_h)
+    H = max(H, 1e-6)
     fl_ts = min(
         _interp_param(x_norm, float(flare_deg), bow_factor=TOPSIDE_BOW_AMP,
                       stern_factor=0.4),
         TOPSIDE_MAX_DEG,
     )
-    y_deck = max(y_wl + E * np.tan(np.deg2rad(fl_ts)),
+    y_deck = max(y_wl + H * np.tan(np.deg2rad(fl_ts)),
                  _bow_deck_floor(x_norm, BWL))
-    return np.arctan2(max(y_deck - y_wl, 0.0), E)
+    return np.arctan2(max(y_deck - y_wl, 0.0), H)
 
 
 def _interp_bilge(x_norm: float, mid_val: float,
@@ -945,16 +963,59 @@ def _interp_bilge(x_norm: float, mid_val: float,
         return mid_val + t * (end_val - mid_val)
 
 
-def _sheer_height(x_norm: float, E: float = 0.20) -> float:
-    """100% flat main deck at freeboard E.
+def _sheer_height(x_norm: float, E: float = 0.20, sheer_bow: float = 0.0,
+                  sheer_stern: float = 0.0) -> float:
+    """Flat midship working deck + kicked-up ends (PYD sheer, JFR mission deck).
 
-    No bow rise, no stern counter-sheer, no midship dip: the deck edge is
-    exactly level along the whole hull.  (History: piecewise-linear
-    bow-1.3E/midship-E/stern-E+0.8*SA*E profile made the deck a warped
-    banana; a quintic bow rise of 0.15*SA followed; both removed — the deck
-    is now planar and SA was dropped from the design vector entirely.)
+    z_sheer(x) = E + sheer_bow*rise_fwd(x) + sheer_stern*rise_aft(x), where the
+    rises are smoothsteps over the forward ~0.25 LWL and aft ~0.20 LWL and the
+    midship zone 0.30-0.70 LWL stays exactly at E for solar/working deck.
+    Defaults (0,0) reproduce the legacy flat deck.
     """
-    return E
+    sb = max(float(sheer_bow), 0.0)
+    ss = max(float(sheer_stern), 0.0)
+    xn = float(np.clip(x_norm, 0.0, 1.0))
+    # forward kick: 1 at stem -> 0 by 25% LWL
+    if xn <= 0.25:
+        t = 1.0 - xn / 0.25
+        rise_fwd = t * t * (3.0 - 2.0 * t)
+    else:
+        rise_fwd = 0.0
+    # aft kick: 1 at transom -> 0 forward of 80% LWL
+    if xn >= 0.80:
+        t = (xn - 0.80) / 0.20
+        rise_aft = t * t * (3.0 - 2.0 * t)
+    else:
+        rise_aft = 0.0
+    return float(E) + sb * rise_fwd + ss * rise_aft
+
+
+def _stem_rake_shift(z_pos: float, stem_rake_deg: float = 0.0) -> float:
+    """Aft (+x) shift of the stem with height above WL. Topside-only."""
+    if z_pos <= 0.0 or not stem_rake_deg:
+        return 0.0
+    return float(z_pos) * float(np.tan(np.deg2rad(float(stem_rake_deg))))
+
+
+# Fleet-standard transoceanic forefoot: bottom-rise cutaway over a fixed
+# forward extent (Brewer bite / Sailbuoy rocker). Only the DEPTH at the stem
+# is optimized; extent is fixed so the cut always blends by 0.20 LWL.
+FOREFOOT_EXTENT = 0.20
+
+
+def _forefoot_factor(x_norm: float, cut: float) -> float:
+    """Multiplier on local T_canoe for the cutaway forefoot (<=1, bow only).
+
+    cut = fraction of local draft removed at the stem point; smoothsteps to
+    1.0 (full depth) at FOREFOOT_EXTENT. 0 = legacy full knife forefoot.
+    """
+    c = float(np.clip(cut, 0.0, 0.9))
+    xn = float(x_norm)
+    if c <= 0.0 or xn >= FOREFOOT_EXTENT:
+        return 1.0
+    t = float(np.clip(xn / FOREFOOT_EXTENT, 0.0, 1.0))
+    s = t * t * (3.0 - 2.0 * t)
+    return (1.0 - c) + c * s
 
 
 def _sac_form(x_norm: np.ndarray, Cp: float, LCB: float = 45.0) -> np.ndarray:
@@ -982,6 +1043,10 @@ def _build_nurbs_control_net(x_dict: dict) -> np.ndarray:
     bilge_r = x_dict["bilge_r"]
     flare_param = x_dict["flare"]
     E_val = x_dict.get("E", 0.20)
+    sheer_bow = float(x_dict.get("sheer_bow", 0.0))
+    sheer_stern = float(x_dict.get("sheer_stern", 0.0))
+    stem_rake = float(x_dict.get("stem_rake_deg", 0.0))
+    forefoot_cut = float(x_dict.get("forefoot_cut", 0.0))
 
     u_pos = np.linspace(0.0, 1.0, 13)
     v_lev = np.linspace(0.0, 1.0, 9)
@@ -1001,14 +1066,14 @@ def _build_nurbs_control_net(x_dict: dict) -> np.ndarray:
         if xn <= 0.0:
             T_local = 1e-6
         else:
-            T_local = T_canoe * (1.0 - 0.3 * (1.0 - xn))
+            T_local = T_canoe * (1.0 - 0.3 * (1.0 - xn)) * _forefoot_factor(xn, forefoot_cut)
             T_local = max(T_local, 1e-6)
 
         dr = _interp_param(xn, deadrise_val)
         br = _interp_bilge(xn, bilge_r)
         fl = _interp_param(xn, flare_param, bow_factor=1.0, stern_factor=0.4)
-        fl_ts = _topside_wall_angle(xn, flare_param, BWL, E_val, y_wl[i])
-        z_sheer = _sheer_height(xn, E_val)
+        z_sheer = _sheer_height(xn, E_val, sheer_bow, sheer_stern)
+        fl_ts = _topside_wall_angle(xn, flare_param, BWL, E_val, y_wl[i], z_sheer)
 
         for j, vf in enumerate(v_lev):
             z_pos = -T_local * (1.0 - vf) + z_sheer * vf
@@ -1024,7 +1089,15 @@ def _build_nurbs_control_net(x_dict: dict) -> np.ndarray:
                 yf = _section_curve(np.array([zn]), y_wl[i], T_local, dr, br, fl)
                 y_val = y_wl[i] * float(yf[0])
 
-            ctrl[i, j] = [xs, y_val, z_pos]
+            xs_r = xs
+            # Stem rake: shift topside bow stations aft with height (x<0.15 LWL, z>0)
+            if stem_rake and z_pos > 0.0 and xn < 0.15 and not (xn <= 0.0 or xn >= 1.0 - 1e-12):
+                xs_r = xs + _stem_rake_shift(z_pos, stem_rake) * max(0.0, 1.0 - xn / 0.15)
+            # Raked stem column itself leans aft with height
+            if stem_rake and xn <= 0.0:
+                xs_r = xs + _stem_rake_shift(max(z_pos, 0.0), stem_rake)
+
+            ctrl[i, j] = [xs_r, y_val, z_pos]
 
     return ctrl
 
@@ -1114,18 +1187,49 @@ def generate_hull(design_vector: np.ndarray,
     keel_rake_val = x_dict["keel_rake"]
     ballast_frac = x_dict["ballast_frac"]
     bulb_density = x_dict.get("bulb_density", 11340)
+    sheer_bow = float(x_dict.get("sheer_bow", 0.0))
+    sheer_stern = float(x_dict.get("sheer_stern", 0.0))
+    stem_rake_deg = float(x_dict.get("stem_rake_deg", 0.0))
+    forefoot_cut = float(x_dict.get("forefoot_cut", 0.0))
+    if not (0.0 <= sheer_bow <= 0.35 and 0.0 <= sheer_stern <= 0.20
+            and 0.0 <= stem_rake_deg <= 30.0 and 0.0 <= forefoot_cut <= 0.9):
+        raise ValueError("RealityCheck: sheer/rake/forefoot out of range")
 
     # Rule 3: Reality Check — fast geometry pre-check (milliseconds)
     _reality_check(x_dict)
 
-    # Cap bulb volume: bulb radius limited by keel chord
-    max_bulb_r = 1.0 * (keel_chord * 0.5)
-    max_bulb_vol = 4.0 / 3.0 * np.pi * max_bulb_r ** 3
+    # Cap bulb volume: bulb radius limited by keel chord (ellipsoidal bulb,
+    # PYD T-keel). Sized so ballast_frac lead fits: V >= ballast/11340.
+    max_bulb_r = 1.5 * (keel_chord * 0.5)
+    max_bulb_vol = 4.0 / 3.0 * np.pi * max_bulb_r ** 3 * 1.33 * 0.8
     if bulb_vol > max_bulb_vol:
         logger.warning(f"Bulb volume capped: requested {x_dict['bulb_vol']:.6f}, max possible {max_bulb_vol:.6f} (keel_chord={keel_chord:.3f})")
     else:
         logger.debug(f"Bulb volume OK: {bulb_vol:.6f} <= {max_bulb_vol:.6f} (keel_chord={keel_chord:.3f})")
     bulb_vol = min(bulb_vol, max_bulb_vol)
+    # Ballast capacity note: lead should fit in the bulb (constraint-gated
+    # downstream in constraints.py). Basis is TRUE displacement
+    # (target_displacement, SAC-clamped — never the raw box B·L·T·Cp·Cm,
+    # which overstates mass 2-3x). Geometry stays buildable so legacy
+    # fixtures/old DB rows still mesh; feasibility is decided downstream.
+    bulb_capacity_ok = True
+    try:
+        if target_displacement is not None and target_displacement > 0:
+            _tgt = float(target_displacement)
+        elif config is not None:
+            _tgt = float(config.fixed.target_displacement)
+        else:
+            _tgt = 0.10
+        _mast = 10.0 if config is None else float(
+            config.fixed.wingsail_mast_mass + config.fixed.wingsail_nose_pod_mass)
+        _pay = 15.0 if config is None else float(config.fixed.payload_mass_kg)
+        _base = _tgt * 1025.0 + _mast + _pay
+        _bh = ballast_frac * max(_base, 40.0)
+        bulb_capacity_ok = _bh <= bulb_vol * 11340 + 1e-9
+        if not bulb_capacity_ok:
+            logger.warning(f"Bulb undersized: ballast {_bh:.1f}kg needs {(_bh/11340):.4f}m3 > bulb {bulb_vol:.4f}m3")
+    except Exception:
+        pass
 
     if output_dir is None:
         output_dir = "/tmp/hull_opt"
@@ -1160,8 +1264,10 @@ def generate_hull(design_vector: np.ndarray,
             if x_norm <= 0.0:
                 T_local = 1e-6
             else:
-                T_local = T_canoe * max(0.05, 1.0 - 0.3 * (1.0 - x_norm))
-            z_sheer = _sheer_height(x_norm, E_val)
+                T_local = T_canoe * max(0.05, 1.0 - 0.3 * (1.0 - x_norm)) \
+                    * _forefoot_factor(x_norm, float(x_dict.get("forefoot_cut", 0.0)))
+            z_sheer = _sheer_height(x_norm, E_val, float(x_dict.get("sheer_bow", 0.0)),
+                                      float(x_dict.get("sheer_stern", 0.0)))
             n_z = 20
             z_vals = np.linspace(-T_local, z_sheer, n_z)
             y_vals = np.zeros(n_z)
@@ -1226,8 +1332,14 @@ def generate_hull(design_vector: np.ndarray,
             yz_scale = float(np.sqrt(max(sac_scale, 1e-10)))
             for p in patches:
                 if "hull" in p.name:
+                    # Sheer-exempt scaling: y fully scaled; z scaled below WL,
+                    # blending to unscaled at the sheer line so bow kick is not
+                    # inflated to meet displacement (PYD reserve vs volume).
+                    zz = p.control_net[:, :, 2]
+                    w = np.clip(-zz / np.maximum(T_canoe, 1e-6), 0.0, 1.0)
+                    zfac = 1.0 + (yz_scale - 1.0) * w
                     p.control_net[:, :, 1] *= yz_scale
-                    p.control_net[:, :, 2] *= yz_scale
+                    p.control_net[:, :, 2] *= zfac
             if target_eff is not None and target_eff > 0:
                 from hull_opt.hydrostatics import nurbs_submerged_volume
                 nurbs_vol, _ = nurbs_submerged_volume(patches, n_sub=5)
@@ -1264,11 +1376,10 @@ def generate_hull(design_vector: np.ndarray,
                 f"(boundary edges remain) — infeasible design (stored as E_GEOM)"
             )
 
-        # Combined STL uses hull+deck only (the keel and bulb NURBS patches
-        # are separate open surfaces that don't share boundaries with the
-        # hull — they contribute to SAC/volume via _compute_nurbs_station_areas
-        # but are not included in the export STL. The BEM and SPH resistance
-        # see hull-only geometry; the FoM impact is < 0.1% relative.
+        # Combined STL (hull+deck only) drives GZ/BEM/low-fi. Keel+bulb are
+        # separate NURBS patches exported ONLY to hull_full.stl for SPH
+        # preview/validation (open shells, require_watertight=False). GZ/BEM
+        # stay hull-only by design; appendage drag enters analytically.
         full_mesh = hull_mesh
 
         # Compute SAC from NURBS station areas
@@ -1460,9 +1571,15 @@ def keel_half_breadth(xq: np.ndarray, zq: np.ndarray,
     frac = (np.where(span_mask, zq, root_z) - root_z) / -D_keel
     taper = 1.0 - 0.5 * frac
     local_chord = keel_chord * taper
+    # Root fillet widening mirrors _build_keel_patch
+    fil = np.where(frac < 0.25, 1.0 + 0.30 * (1.0 - frac / 0.25), 1.0)
+    local_chord = local_chord * fil
     naca_max = max(1e-10, _naca_thickness(0.3, keel_tc))
-    scale = 0.5 * (BWL * 0.06) * taper / naca_max
-    sweep_shift = (np.where(span_mask, zq, root_z) - root_z) \
+    thick = np.where(frac < 0.25, (keel_chord * 0.12) * taper * (1.0 + 0.50 * (1.0 - frac / 0.25)),
+                     (keel_chord * 0.12) * taper)
+    scale = 0.5 * thick / naca_max
+    # Aft sweep to match mesh (+rake -> +x)
+    sweep_shift = (root_z - np.where(span_mask, zq, root_z)) \
         * np.tan(np.deg2rad(keel_rake))
     x_start = -local_chord / 2.0 + sweep_shift + keel_x_pos
     xi = (xq - x_start) / local_chord
@@ -1500,7 +1617,10 @@ def compute_half_breadth_analytic(xq: np.ndarray, zq: np.ndarray,
 
         x_dict_lcb = x_dict.get("LCB", 45.0)
         y_wl = _waterline_half_breadth(x_norm, BWL, Cp, Cm=Cm, LCB=x_dict_lcb)
+        fcut = float(x_dict.get("forefoot_cut", 0.0))
         T_local = T_canoe * (1.0 - 0.3 * (1.0 - x_norm))
+        T_local = np.maximum(T_local, 1e-6) * np.array(
+            [_forefoot_factor(float(xn), fcut) for xn in x_norm])
         z_norm = np.clip(zs / T_local, -1.0, 0.0)
 
         dr = np.array([_interp_param(xn, deadrise) for xn in x_norm])
@@ -1514,7 +1634,7 @@ def compute_half_breadth_analytic(xq: np.ndarray, zq: np.ndarray,
 
         result[mask_below] = y_local * sac_scale
 
-    # Above waterline (z > 0): flare from waterline half-breadth
+    # Above waterline (z > 0): flare from waterline half-breadth, capped at sheer
     mask_above = (np.abs(xq) <= LWL / 2) & (zq > 0) & (zq <= max(0.5, x_dict.get('E', 0.2) * 3))
     if np.any(mask_above):
         xs = xq[mask_above]
@@ -1523,9 +1643,14 @@ def compute_half_breadth_analytic(xq: np.ndarray, zq: np.ndarray,
         x_dict_lcb = x_dict.get("LCB", 45.0)
         y_wl = _waterline_half_breadth(x_norm, BWL, Cp, Cm=Cm, LCB=x_dict_lcb)
         E_val = x_dict.get("E", 0.2)
-        fl_ts = np.array([_topside_wall_angle(xn, flare, BWL, E_val, yw)
-                          for xn, yw in zip(x_norm, y_wl)])
+        sb = float(x_dict.get("sheer_bow", 0.0))
+        ss = float(x_dict.get("sheer_stern", 0.0))
+        zsh = np.array([_sheer_height(float(xn), E_val, sb, ss) for xn in x_norm])
+        fl_ts = np.array([_topside_wall_angle(xn, flare, BWL, E_val, yw, zh)
+                          for xn, yw, zh in zip(x_norm, y_wl, zsh)])
         y_flare = y_wl + zs * np.tan(fl_ts)
+        # cap above sheer deck: no phantom topsides
+        y_flare = np.where(zs <= zsh + 1e-9, y_flare, 0.0)
         result[mask_above] = y_flare * sac_scale
     return result
 
@@ -1695,12 +1820,17 @@ def _compute_hydrostatics(mesh: trimesh.Trimesh, LWL: float,
     Am = volume / max(1e-10, Cp * LWL)
     rho = 1025.0
     mast_mass_total = float(mast_masses[0]) + float(mast_masses[1])
-    total_mass = volume * rho + mast_mass_total
+    # Bug #171: payload belongs in the base mass — compute_cg_z closes
+    # total0 = nabla*rho + mast + payload, so the reporting total must too
+    # (was light by the 15 kg payload vs the CG path).
+    payload_mass = float(getattr(config.fixed, "payload_mass_kg", 0.0)) if config is not None else 0.0
+    total_mass = volume * rho + mast_mass_total + payload_mass
     bulb_mass = bulb_vol * bulb_density  # Always from actual bulb geometry
-    keel_mass = max(0, D_keel * keel_chord * (BWL * 0.06) * 0.5 * 1025)  # Always from actual keel geometry
+    keel_mass = max(0, D_keel * keel_chord * (keel_chord * 0.12) * 0.5 * 1025)  # chord-based t/c 12%, matches mesh
     # Single source of truth for the mass/CG model: hydrostatics.compute_cg_z/x
     # (payload at deck height, ballast IN the bulb, hull structural floor —
     # mirrors the audit fixes). Kept in sync with the FoM/constraint path.
+    ballast_tip_kg, ballast_fin_kg, m_struct = 0.0, 0.0, 0.0
     if x_dict is not None:
         from hull_opt.hydrostatics import compute_cg_z as _h_cg_z, compute_cg_x as _h_cg_x
         try:
@@ -1712,10 +1842,15 @@ def _compute_hydrostatics(mesh: trimesh.Trimesh, LWL: float,
             cg_z = None
             cg_x = None
         # Reporting-only split (CG itself comes from the unified model).
-        payload_mass = float(getattr(config.fixed, "payload_mass_kg", 0.0)) if config is not None else 0.0
-        ballast_mass = max(0.0, total_mass * ballast_frac)
-        hull_mass = max(0.0, total_mass - bulb_mass - keel_mass - ballast_mass
-                        - mast_mass_total - payload_mass)
+        # Mirrors hydrostatics._ballast_struct_split so report == CG mass.
+        from hull_opt.hydrostatics import _ballast_struct_split as _split
+        hull_floor = float(getattr(config.fixed, "hull_mass_floor_kg", 20.0)) if config is not None else 20.0
+        _sp = _split(total_mass, bulb_mass, keel_mass, mast_mass_total,
+                     payload_mass, ballast_frac, bulb_vol, D_keel,
+                     keel_chord, hull_floor, config)
+        ballast_mass, hull_mass = _sp["ballast"], _sp["hull"]
+        total_mass, m_struct = _sp["total"], _sp["m_struct"]
+        ballast_tip_kg, ballast_fin_kg = _sp["m_tip"], _sp["m_fin"]
     else:
         cg_z = None
         cg_x = None
@@ -1747,6 +1882,7 @@ def _compute_hydrostatics(mesh: trimesh.Trimesh, LWL: float,
         cg_x = (hull_mass * hull_cg_x + keel_mass * keel_ballast_cg_x
                 + bulb_mass * bulb_cg_x + ballast_mass * keel_ballast_cg_x
                 + mast_masses[0] * mast_cg_x[0] + mast_masses[1] * mast_cg_x[1]) / max(1e-10, total_mass)
+        ballast_tip_kg, ballast_fin_kg = 0.0, float(ballast_mass)  # legacy path: all mid-fin
 
     underwater_vol = volume
     return {
@@ -1777,6 +1913,9 @@ def _compute_hydrostatics(mesh: trimesh.Trimesh, LWL: float,
         "bulb_mass_kg": float(bulb_mass),
         "keel_mass_kg": float(keel_mass),
         "ballast_mass_kg": float(ballast_mass),
+        "ballast_tip_kg": float(ballast_tip_kg),
+        "ballast_fin_kg": float(ballast_fin_kg),
+        "struct_mass_kg": float(m_struct),
         "hull_mass_kg": float(hull_mass),
         "ballast_frac": ballast_frac,
         "sac_scale_factor": sac_scale_factor,

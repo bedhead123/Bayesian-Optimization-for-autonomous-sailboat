@@ -185,12 +185,18 @@ def solve_one_point(x_dict: dict, config, gz_curve: np.ndarray,
 
 
 def evaluate_balance_polar(x_dict: dict, config, gz_curve: np.ndarray,
-                           hydro: dict, boat_speed_ms: Optional[float] = None) -> dict:
+                           hydro: dict, boat_speed_ms: Optional[float] = None,
+                           tws_ops_kt: float = 10.0,
+                           tws_storm_kt: Optional[float] = None) -> dict:
     """System-level 360° balance across compass points.
 
     Evaluates 8 TWA points at operational wind and at storm feathered wind.
     Returns summary dict with worst-case heel/leeway, mean drive/VMG, per-point
     results, and overall feasible flag. Cheap (<5 ms).
+
+    Bug #169: tws_ops_kt parametrized so the mission FoM can score light /
+    medium / heavy bands through the same solver. Defaults reproduce the
+    legacy 10 kt ops call exactly (gates + DB read these keys).
     """
     from hull_opt.hydrostatics import compute_avs
 
@@ -207,9 +213,13 @@ def evaluate_balance_polar(x_dict: dict, config, gz_curve: np.ndarray,
     if not np.isfinite(AVS) or AVS <= 0:
         AVS = 90.0
 
-    # Operational wind: 10 kt (typical sailing), storm: 80 kt feathered
-    TWS_ops = 10.0 * 0.514444  # 5.14 m/s
-    TWS_storm = float(config.validation.storm_wind_speed_knots * 0.514444)
+    # Operational wind (default 10 kt typical sailing) and storm feathered wind.
+    # Bug #169: ops TWS is a parameter (mission bands); storm defaults to config.
+    TWS_ops = float(tws_ops_kt) * 0.514444
+    if tws_storm_kt is None:
+        TWS_storm = float(config.validation.storm_wind_speed_knots * 0.514444)
+    else:
+        TWS_storm = float(tws_storm_kt) * 0.514444
 
     TWAs = [0, 45, 90, 135, 180, 225, 270, 315]  # full circle; symmetry will duplicate but checks both tacks
     # Unique for scoring: 0,45,90,135,180 (others mirror)
@@ -235,6 +245,14 @@ def evaluate_balance_polar(x_dict: dict, config, gz_curve: np.ndarray,
 
     def _mean_drive(points):
         vals = [p.get("drive_N", 0) for p in points if p.get("feasible", False) and p.get("drive_N", 0) > 0]
+        return float(np.mean(vals)) if vals else 0.0
+
+    def _reach_drive(points):
+        # Bug #169: ocean-crossing mission lives on reach/run (TWA 90/135/180).
+        # Mean drive over feasible reach/run points; upwind (45) priced via VMG.
+        vals = [p.get("drive_N", 0) for p in points
+                if p.get("feasible", False) and p.get("TWA_deg", 0) in (90, 135, 180)
+                and p.get("drive_N", 0) > 0]
         return float(np.mean(vals)) if vals else 0.0
 
     # VMG: drive component projected onto course? Approx VMG = boat_speed * cos(TWA) if drive>0,
@@ -280,6 +298,7 @@ def evaluate_balance_polar(x_dict: dict, config, gz_curve: np.ndarray,
         "worst_heel_storm_deg": float(worst_heel_storm),
         "worst_leeway_storm_deg": float(worst_leeway_storm),
         "mean_drive_ops_N": float(_mean_drive(ops_points)),
+        "reach_drive_ops_N": float(_reach_drive(ops_points)),
         "vmg_up_N": float(vmg_up),
         "vmg_down_N": float(vmg_down),
         "worst_yaw_Nm": float(worst_yaw),

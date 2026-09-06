@@ -738,11 +738,17 @@ def storm_domain(LWL: float, B: float, T: float, Hs: float, dp: float) -> dict:
     # Real water column height (tank floor -> still water level): the piston
     # "depth" parameter is the fluid depth, not the floor depth below z=0.
     water_depth = zmin + still_water_level
-    # Irregular-wave paddle stroke scales ~ wave height; for Hs in this
-    # project the stroke amplitude is ~0.2 m.  Give the paddle a back pocket
-    # of 0.35 m so the back-stroke never exits the domain, plus a 0.1 m thick
-    # paddle (>= 1.5*dp) so GenCase generates a solid boundary wall.
-    x_paddle_lo = -xmax + 0.35
+    # Irregular-wave paddle stroke scales ~ wave height, and the 2nd-order
+    # piston transfer approaches ~1 in shallow transfer regimes: peak travel
+    # over a 1024-wave JONSWAP realization reaches ~Hs. The old fixed 0.35 m
+    # pocket let the paddle exit the particle-derived domain on the return
+    # stroke (AbortBoundOut, -X face) for shallow narrow hulls
+    # (ref_ds_41/91/121/141/161 — all B=0.55). Size the pocket from Hs
+    # (Bug #167); the particle estimator stays in sync via storm_domain.
+    # Paddle stays >= 1.5*dp thick so GenCase builds a solid boundary wall.
+    stroke_est = Hs
+    pocket = max(0.35, stroke_est + 4.0 * dp)
+    x_paddle_lo = -xmax + pocket
     x_paddle_th = max(0.10, 2.0 * dp)
     # Wave-damping slab ahead of the far-end wall kills the wave energy before
     # it reflects off the closed end.  Start well clear of the hull (hull
@@ -1175,7 +1181,9 @@ def write_inverted_case(case_dir: Path, hull_stl_path: str,
                         gravity: float = 9.81,
                         cg_z: Optional[float] = None,
                         eb_coords: tuple = (0.0, 0.0, -0.05),
-                        keel_chord: float = 0.0):  # noqa: unused, kept for API compat
+                        keel_chord: float = 0.0,  # noqa: unused, kept for API compat
+                        inertia: Optional[tuple] = None,
+                        max_particles: int = 400000):
     """Inverted self-righting test: hull capsized (deck down, keel up).
 
     The STL is rotated 180 degrees about the x axis and placed with the deck
@@ -1201,55 +1209,28 @@ def write_inverted_case(case_dir: Path, hull_stl_path: str,
     inverted_path = case_dir / "inverted_hull.stl"
     mesh.export(str(inverted_path))
 
-    z_sheer_max = float(mesh.bounds[1, 2])
+    z0, z1 = float(mesh.bounds[0, 2]), float(mesh.bounds[1, 2])
+    z_sheer_max = z1  # post-flip keel-tip-up height (measured, not param)
     T_total = T_canoe + D_keel
-    Ixx = mass * (B ** 2 + T_total ** 2) / 12.0
-    Iyy = mass * (LWL ** 2 + T_total ** 2) / 12.0
-    Izz = mass * (LWL ** 2 + B ** 2) / 12.0
+    # Measured draft beats param draft: bulb overlap/rake shift the true tip.
+    T_meas = max(z1, T_total)
+    if inertia is not None:
+        Ixx, Iyy, Izz = (float(inertia[0]), float(inertia[1]), float(inertia[2]))
+    else:
+        Ixx = mass * (B ** 2 + T_total ** 2) / 12.0
+        Iyy = mass * (LWL ** 2 + T_total ** 2) / 12.0
+        Izz = mass * (LWL ** 2 + B ** 2) / 12.0
     if cg_z is None:
         cg_z = -T_total * 0.4
     zsurf = 0.0
-    z_floor = -1.5 * T_total
-    # Ensure the fillbox always has positive height (>= 5 particle layers) so
-    # GenCase always creates fluid particles (otherwise the solver crashes
-    # with "Constant 'b' cannot be zero").
-    z_floor = min(z_floor, zsurf - max(5.0 * dp, 0.01))
-    # Tank sized to the hull's motion envelope, not just the still-water
-    # column. The solver domain (MapRealPos) is the INITIAL particle bbox
-    # + (KernelH*0.05 + dp/2) — the def box is NOT the domain. With the keel
-    # tip pointing UP (z'=+z_sheer_max above the waterline) the old wall top
-    # at zsurf+0.2 put the domain top 4 cm above the keel tip: the floating
-    # hull bobbed up and was excluded (AbortBoundOut, +Z). Walls now extend
-    # z_sheer_max + 0.5 above the surface so the domain covers the bob.
-    # ymax must cover the self-righting roll swing (keel tip traces a circle
-    # of radius z_sheer_max about the CG), not just 1.5*B. Floor kept at
-    # 1.5*T_total: the upright keel tip reaches -T_total after the roll.
-    z_wall_top = zsurf + z_sheer_max + 0.5
-    z_floor = min(z_floor, -1.5 * T_total)
 
-    x0 = -1.5 * LWL
-    x1 = +1.5 * LWL
-    ymax = max(1.5 * B, z_sheer_max + 0.3)
-    ymin = -ymax
-    hull_x = -LWL / 2.0
-
-    wall_box = (
-        (x0 - 2.0 * dp, ymin - 2.0 * dp, z_floor - 2.0 * dp),
-        (x1 - x0 + 4.0 * dp, 2.0 * ymax + 4.0 * dp, z_wall_top - z_floor + 2.0 * dp),
-    )
-    fillbox = (
-        (x0, ymin, z_floor),
-        (x1 - x0, 2.0 * ymax, zsurf - z_floor),
-    )
-
-    # upside-down equilibrium draft: with drawmove z = dz, the rotated hull
-    # sits at tank_z = z' + dz, so the submerged part (tank_z < 0) is the
-    # region z' < -dz. Find dz so that its volume displaces mass/rho of water.
-    # dz ranges from +z_sheer_max (deck at the surface, V=0) down to the
-    # tank floor (V = full hull volume).
+    # upside-down equilibrium draft FIRST (domain derives from it below):
+    # with drawmove z = dz, the rotated hull sits at tank_z = z' + dz, so
+    # the submerged part (tank_z < 0) is the region z' < -dz. Find dz so
+    # that its volume displaces mass/rho of water.
     target_vol = mass / rho
-    lo = -3.0 * T_canoe - z_sheer_max
-    hi = z_sheer_max
+    lo = -3.0 * T_canoe - z1
+    hi = z1
 
     def _submerged_vol(dz):
         cut = trimesh.intersections.slice_mesh_plane(
@@ -1269,6 +1250,55 @@ def write_inverted_case(case_dir: Path, hull_stl_path: str,
             else:
                 hi = mid
         dz_eq = 0.5 * (lo + hi)
+
+    # Tank sized to the MEASURED motion envelope (Bug #166). The solver
+    # domain (MapRealPos) is the INITIAL particle bbox + (KernelH*0.05 +
+    # dp/2) — the def box is NOT the domain. Tip/deck/CG positions below
+    # are all in the tank frame (post-rotation, post-drawmove).
+    z_tip = dz_eq + z1
+    z_dk = dz_eq + z0
+    z_cg = -cg_z + dz_eq
+    R = max(abs(z_tip - z_cg), abs(z_dk - z_cg), 0.5 * B)
+
+    x0 = -1.5 * LWL
+    x1 = +1.5 * LWL
+    hull_x = -LWL / 2.0
+
+    def _tank(dp_):
+        _h = 2.0 * dp_  # smoothing-length scale
+        _marg = _h * 0.05 + dp_ / 2.0 + 2.0 * dp_  # kernel + lattice + bob
+        _wtop = z_tip + 0.5 + _marg
+        _floor = min(-1.5 * T_meas, z_dk - 0.3) - _marg
+        # fillbox must keep positive height (>= 5 layers) or GenCase makes
+        # zero fluid ("Constant 'b' cannot be zero").
+        _floor = min(_floor, zsurf - max(5.0 * dp_, 0.01))
+        # ymax covers the self-righting roll swing (radius R about the CG).
+        _ymax = R + 0.3 + _marg
+        return _wtop, _floor, _ymax, _marg
+
+    # Adaptive dp (Bug #162 pattern): fluid volume grows ~T^2, so deep-keel
+    # hulls blow the particle cap at fixed dp. Coarsen before GenCase.
+    z_wall_top, z_floor, ymax, marg = _tank(dp)
+    _vfluid = (x1 - x0) * (2.0 * ymax) * (zsurf - z_floor)
+    while _vfluid / max(dp ** 3, 1e-12) > max_particles and dp < 0.12:
+        dp *= 1.2
+        z_wall_top, z_floor, ymax, marg = _tank(dp)
+        _vfluid = (x1 - x0) * (2.0 * ymax) * (zsurf - z_floor)
+    ymin = -ymax
+    logger.info(f"inverted case: T_meas={T_meas:.2f} dz_eq={dz_eq:.2f} "
+                f"walls=[{z_floor:.2f},{z_wall_top:.2f}] ymax={ymax:.2f} dp={dp:.4f}")
+
+    wall_box = (
+        (x0 - 2.0 * dp, ymin - 2.0 * dp, z_floor - 2.0 * dp),
+        (x1 - x0 + 4.0 * dp, 2.0 * ymax + 4.0 * dp, z_wall_top - z_floor + 2.0 * dp),
+    )
+    fillbox = (
+        (x0, ymin, z_floor),
+        (x1 - x0, 2.0 * ymax, zsurf - z_floor),
+    )
+
+    # upside-down equilibrium draft was solved above (dz_eq) before the
+    # domain was derived from it, so the walls already cover tip +/- bob.
 
     # deck surface depth at equilibrium, from ray casts on the rotated mesh:
     # a ray up from below hits the deck (lowest point of the inverted hull)
@@ -1314,12 +1344,9 @@ def write_inverted_case(case_dir: Path, hull_stl_path: str,
         dp=dp,
         def_x0=x0 - DEF_MARGIN, def_y0=ymin - DEF_MARGIN, def_z0=z_floor - DEF_MARGIN,
         def_x1=x1 + DEF_MARGIN, def_y1=ymax + DEF_MARGIN,
-        # keel tip (rotated z' = +T_total) sits at tank z = hull_z + T_total,
-        # far above the tank top wall: the definition box must cover it.
-        # The 8*dp margin (was 2*dp) gives the floating hull headroom to bob
-        # up out of its initial position without pushing particles past the
-        # domain top (AbortBoundOut -> JSph.cpp:2909 exclusion abort).
-        def_z1=z_sheer_max * 2.0 + 8.0 * dp,
+        # def box covers the measured tip + bob headroom (walls already do);
+        # it must exceed the walls or GenCase drops flush faces (DEF_MARGIN).
+        def_z1=z_wall_top + DEF_MARGIN,
         wall_x0=x0 - 2.0 * dp, wall_y0=ymin - 2.0 * dp,
         wall_dx=x1 - x0 + 4.0 * dp, wall_dy=2.0 * ymax + 4.0 * dp,
         fluid_x0=x0, fluid_y0=ymin, fluid_dx=x1 - x0, fluid_dy=2.0 * ymax,

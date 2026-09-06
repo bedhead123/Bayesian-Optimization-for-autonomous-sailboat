@@ -43,14 +43,18 @@ def extended_keel_clr_x(x_dict: dict) -> float:
     45% of the keel draft (keel extended to the waterline). NOT CB_x, NOT
     the geometric/area centroid. keel_rake is in DEGREES (geometry uses
     deg2rad). The ~30° debris-shedding sweep moves the CLR aft by up to
-    0.5·D·tan(rake) — the forum's "sweep loads the bottom" correction."""
+    0.5·D·tan(rake) — the forum's "sweep loads the bottom" correction.
+    Bug #171: depth is T_canoe + D_keel (waterline-extended, per PYD —
+    was fin-only D, putting CLR ~6% LWL too far forward and hiding lee
+    helm); root 25%-chord anchored to the meshed root LE (fillet 1.3x)."""
     LWL = x_dict["LWL"]
     D = float(x_dict.get("D_keel", 1.0))
+    T = float(x_dict.get("T_canoe", 0.3))
     kc = float(x_dict.get("keel_chord", 0.2))
     bp = float(x_dict.get("bulb_pos", 0.4))
     rake = float(x_dict.get("keel_rake", 15.0))
-    x_le = bp * LWL - 0.4 * kc          # keel root LE anchor (geometry.py)
-    clr = x_le + 0.25 * kc + 0.45 * D * np.tan(np.radians(rake))
+    x25_root = bp * LWL - 0.25 * 1.3 * kc  # root LE = pos - filleted half-chord pair
+    clr = x25_root + 0.45 * (T + D) * np.tan(np.radians(rake))
     return float(clr)
 
 

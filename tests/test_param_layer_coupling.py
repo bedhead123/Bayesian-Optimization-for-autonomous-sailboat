@@ -72,10 +72,12 @@ def test_bulb_vol_coupling_monotone_across_chord_range():
 
 
 def test_bulb_vol_decouple_when_config_none():
-    # config=None fallback path keeps hardcoded bounds (no coupling)
+    # config=None fallback path keeps hardcoded bounds (no coupling).
+    # Bug #171: fallbacks mirror live config bounds (0.002, 0.0065) — the
+    # old 0.004 pinned bound-rot as expected behavior.
     raw = np.zeros(17)
     raw[7] = -10.0  # keel_chord near lower bound
-    raw[8] = 20.0   # bulb_vol saturated
+    raw[8] = 20.0  # bulb_vol saturated
     x = design_vector_to_physical(raw, None)
     assert x["keel_chord"] < 0.181
-    assert x["bulb_vol"] == pytest.approx(0.004, abs=1e-9)
+    assert x["bulb_vol"] == pytest.approx(0.0065, abs=1e-9)

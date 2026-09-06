@@ -49,9 +49,51 @@ class ReferenceRunner(threading.Thread):
         self.settings = load_reference_settings(config)
         self._stop_event = threading.Event()
 
+    def _connect(self):
+        # Generous timeouts + WAL: the BO loop + Ray workers write heavily
+        # while this thread polls (Bug #165: disk I/O error killed the thread
+        # when output/ was wiped mid-run by a second process).
+        import sqlite3 as _sq
+        conn = _sq.connect(self.db_path, timeout=30.0, check_same_thread=False,
+                           isolation_level=None)
+        conn.row_factory = _sq.Row
+        try:
+            conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA busy_timeout=30000;")
+            conn.execute("PRAGMA synchronous=NORMAL;")
+        except Exception:
+            pass
+        return conn
+
+    def _q(self, method, *args, retries=5, **kwargs):
+        # Retry transient sqlite faults (busy/locked/disk I/O); reconnect once
+        # on persistent failure. `method` is re-resolved from self._conn on
+        # every attempt so reconnects take effect. Never let a poll error
+        # escape run().
+        import sqlite3 as _sq
+        import time as _t
+        import random as _r
+        last = None
+        for i in range(retries):
+            try:
+                return getattr(self._conn, method)(*args, **kwargs)
+            except _sq.OperationalError as e:
+                last = e
+                _t.sleep(0.2 * 2 ** i + _r.uniform(0, 0.1))
+        try:
+            self._conn.close()
+        except Exception:
+            pass
+        try:
+            self._conn = self._connect()
+            return getattr(self._conn, method)(*args, **kwargs)
+        except Exception:
+            pass
+        raise last
+
     def run(self):
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
+        self._conn = self._connect()
+        q = self._q  # q("execute", sql, params) / q("commit")
         while not self._stop_event.is_set():
             try:
                 item = self.queue.get(timeout=10)
@@ -63,7 +105,8 @@ class ReferenceRunner(threading.Thread):
             design_id = item["design_id"]
             design_vector = item["design_vector"]
             iteration = item["iteration"]
-            existing = conn.execute(
+            existing = q(
+                "execute",
                 "SELECT status FROM reference_runs WHERE design_id=?", (design_id,)
             ).fetchone()
             if existing is not None:
@@ -89,9 +132,19 @@ class ReferenceRunner(threading.Thread):
                     continue
                 # Look up the STL path from the DB; skip if the design has no
                 # geometry (failed generation) or the file is missing.
-                stl_row = conn.execute(
-                    "SELECT cad_stl_path FROM designs WHERE id=?", (design_id,)
+                stl_row = q(
+                    "execute",
+                    "SELECT cad_stl_path, feasible FROM designs WHERE id=?",
+                    (design_id,),
                 ).fetchone()
+                if stl_row is not None and stl_row["feasible"] == 0:
+                    # Infeasible designs never get geometry: drop immediately
+                    # instead of burning the 5-min poll (Bug #167: designs
+                    # 19/33 sat the full deadline with no STL coming).
+                    logger.info(
+                        f"design {design_id} infeasible — dropping its storm"
+                    )
+                    continue
                 stl_path = (stl_row["cad_stl_path"] if stl_row
                             and stl_row["cad_stl_path"]
                             and Path(stl_row["cad_stl_path"]).exists()
@@ -106,8 +159,9 @@ class ReferenceRunner(threading.Thread):
                     deadline = time.time() + 300
                     while stl_path is None and time.time() < deadline:
                         time.sleep(15)
-                        stl_row = conn.execute(
-                            "SELECT cad_stl_path FROM designs WHERE id=?",
+                        stl_row = q(
+                            "execute",
+                            "SELECT cad_stl_path, feasible FROM designs WHERE id=?",
                             (design_id,),
                         ).fetchone()
                         stl_path = (stl_row["cad_stl_path"] if stl_row
@@ -131,7 +185,8 @@ class ReferenceRunner(threading.Thread):
                     gpu_lock=self.gpu_lock_path,
                     held_lock_fd=lock_fd,
                 )
-                conn.execute(
+                q(
+                    "execute",
                     """INSERT OR REPLACE INTO reference_runs
                     (design_id, tool, status, max_accel_g, max_pressure_pa,
                      final_orientation, capsized, sim_time_s, wall_time_s, details)
@@ -144,8 +199,9 @@ class ReferenceRunner(threading.Thread):
                      result.get("sim_time_s"), result.get("wall_time_s"),
                      result.get("details",""))
                 )
-                conn.commit()
-                rapid_row = conn.execute(
+                q("commit")
+                rapid_row = q(
+                    "execute",
                     "SELECT rapid_gates FROM designs WHERE id=?", (design_id,)
                 ).fetchone()
                 if rapid_row and rapid_row["rapid_gates"]:
@@ -154,16 +210,18 @@ class ReferenceRunner(threading.Thread):
                     ref_accel = result.get("max_accel_g", 0)
                     if gate_accel > 0 and ref_accel > 0:
                         ratio = ref_accel / gate_accel
-                        old = conn.execute(
+                        old = q(
+                            "execute",
                             "SELECT value FROM corrections WHERE key='storm_accel'"
                         ).fetchone()
                         old_val = float(old["value"]) if old else 1.0
                         new_val, _ = update_correction("storm_accel", old_val, ratio)
-                        conn.execute(
+                        q(
+                            "execute",
                             "INSERT OR REPLACE INTO corrections(key, value) VALUES('storm_accel',?)",
                             (new_val,)
                         )
-                        conn.commit()
+                        q("commit")
                         log_rapid_summary(design_id, rapid,
                                           extra={"iter": iteration})
                         logger.info(
@@ -173,11 +231,12 @@ class ReferenceRunner(threading.Thread):
                         )
             except Exception as exc:
                 try:
-                    conn.execute(
+                    q(
+                        "execute",
                         "INSERT OR REPLACE INTO reference_runs(design_id,tool,status,details) VALUES(?,'dualsphysics','FAILED',?)",
                         (design_id, str(exc)[:500])
                     )
-                    conn.commit()
+                    q("commit")
                 except Exception as inner_exc:
                     logger.warning(f"Failed to record reference run error in DB: {inner_exc}")
             finally:
@@ -189,7 +248,10 @@ class ReferenceRunner(threading.Thread):
                     except Exception:
                         pass
                 self.queue.task_done()
-        conn.close()
+        try:
+            self._conn.close()
+        except Exception:
+            pass
 
     def stop(self):
         self._stop_event.set()

@@ -103,12 +103,37 @@ def compute_wave_resistance_michell(half_breadth_func, LWL: float, B: float,
     return max(0.0, Rw)
 
 
+def delft_cap_frac(Fn: float) -> float:
+    """Residuary/displacement envelope from PYD Ch.5 printed Delft bands:
+    ~0.4% @Fn 0.30, ~0.8% @0.35, ~2.2% @0.40, ~5% @0.45 (Bug #171: was a
+    flat 0.035 everywhere, over-allowing low Fn and hiding the high-Fn
+    hump). Linear interp, floored at 0.004. Above Fn 0.45 (outside Delft
+    validity) returns the last band 0.05 — stated limit of knowledge, not
+    a model. Pure function."""
+    pts = ((0.30, 0.004), (0.35, 0.008), (0.40, 0.022), (0.45, 0.05))
+    try:
+        f = float(Fn)
+    except Exception:
+        return 0.035
+    if not np.isfinite(f):
+        return 0.035
+    if f <= pts[0][0]:
+        return pts[0][1]
+    for (f0, c0), (f1, c1) in zip(pts, pts[1:]):
+        if f <= f1:
+            t = (f - f0) / max(1e-9, f1 - f0)
+            return c0 + t * (c1 - c0)
+    return 0.05
+
+
 def capped_wave_resistance(Rw: float, nabla_m3: float, rho: float = 1025.0,
                            g: float = 9.81, cap_frac: float = 0.035) -> float:
-    """PYD Ch.5 residuary envelope: ~2-5% of displacement weight at
-    Fn 0.40-0.45 (Delft-series band). Michell thin-ship overpredicts 2-5x
-    at B/L~0.25; cap to the Delft band and keep a 5% floor so geometry
-    sensitivity survives below the cap. Applies at EVERY Rt site so the
+    """PYD Ch.5 residuary envelope as a fraction of displacement weight.
+    Michell thin-ship overpredicts 2-5x at B/L~0.25; cap to the Delft band
+    so the FoM tracks reality and the SPH calibration band is reachable.
+    Bug #171: TRUE cap now — min(Rw, cap). The old max(cap, 0.05*Rw) leaked:
+    any spike over 20x cap returned 5% of itself, unbounded, so the
+    optimizer could game Michell spikes. Applies at EVERY Rt site so the
     low-fi, light-wind and validation paths agree."""
     cap = cap_frac * rho * g * max(1e-6, nabla_m3)
-    return float(min(max(0.0, Rw), max(cap, 0.05 * Rw)))
+    return float(min(max(0.0, Rw), cap))

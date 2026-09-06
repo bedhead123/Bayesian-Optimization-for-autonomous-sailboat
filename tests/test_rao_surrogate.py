@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from hull_opt.config import design_vector_names
 from hull_opt.rao_surrogate import RAOSurrogateConfig, RAOSurrogate
 
 
@@ -32,7 +33,7 @@ def test_anchor_grid():
 
 
 def test_predict_before_ready_raises(surrogate):
-    dv = np.zeros(17, dtype=np.float64)
+    dv = np.zeros(len(design_vector_names()), dtype=np.float64)
     with pytest.raises(RuntimeError, match="not ready"):
         surrogate.predict(dv, 1.0, 90.0)
 
@@ -45,7 +46,7 @@ def test_add_samples_and_train_with_synthetic():
     bem_data = []
     rng = np.random.default_rng(123)
     for _ in range(n_samples):
-        dv = rng.uniform(-1, 1, 17).tolist()
+        dv = rng.uniform(-1, 1, len(design_vector_names())).tolist()
         omega = float(rng.uniform(0.5, 5.0))
         heading = float(rng.choice([90.0, 135.0, 180.0]))
         heave = 0.5 + 0.1 * dv[0] + 0.05 * omega
@@ -82,7 +83,7 @@ def test_predict_batch_shape(surrogate):
     rng = np.random.default_rng(42)
     bem_data = []
     for _ in range(10):
-        dv = rng.uniform(-1, 1, 17).tolist()
+        dv = rng.uniform(-1, 1, len(design_vector_names())).tolist()
         bem_data.append({
             "design_vector": dv, "omega": float(rng.uniform(0.5, 5.0)),
             "heading_deg": float(rng.choice([90.0, 135.0, 180.0])),
@@ -93,7 +94,7 @@ def test_predict_batch_shape(surrogate):
     surr2.add_samples(bem_data)
     surr2.train(force=True)
 
-    dv = rng.uniform(-1, 1, 17)
+    dv = rng.uniform(-1, 1, len(design_vector_names()))
     omegas = np.linspace(0.5, 5.0, 8)
     headings = [90.0, 180.0]
     preds = surr2.predict_batch(dv, omegas, headings)

@@ -142,3 +142,24 @@ class TestCleanSlate:
         _clean_slate(out, db_path)
         assert not (out / "gpu.lock").exists()
         assert not db_path.exists()
+
+    def test_clean_slate_backs_up_campaign_db(self, tmp_path):
+        # Bug #170: a DB holding designs must be moved to a timestamped
+        # backup, never unlinked — wipes must be recoverable.
+        import sqlite3
+        from run_optimization import _clean_slate
+        out = tmp_path / "output3"
+        out.mkdir()
+        db_path = tmp_path / "optimization3.db"
+        c = sqlite3.connect(str(db_path))
+        c.execute("create table designs (id integer primary key, fom real)")
+        c.execute("insert into designs values (1, 3.5)")
+        c.commit()
+        c.close()
+        _clean_slate(out, db_path)
+        assert not db_path.exists()
+        backups = sorted(out.glob(".backup_*"))
+        assert len(backups) == 1
+        rescued = sqlite3.connect(f"file:{backups[0] / 'optimization3.db'}?mode=ro", uri=True)
+        assert rescued.execute("select count(*) from designs").fetchone()[0] == 1
+        rescued.close()

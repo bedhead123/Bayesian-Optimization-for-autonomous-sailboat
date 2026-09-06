@@ -19,13 +19,13 @@ bounds:
   - 56.0
   D_keel:
   - 0.45
-  - 0.65
+  - 2.50
   keel_chord:
   - 0.18
   - 0.26
   bulb_vol:
-  - 0.0015
-  - 0.0025
+  - 0.002
+  - 0.0065
   bulb_pos:
   - 0.3
   - 0.5
@@ -50,8 +50,23 @@ bounds:
   wingsail_pos:
   - 0.30
   - 0.75
+  sheer_bow:
+  - 0.0
+  - 0.0
+  sheer_stern:
+  - 0.0
+  - 0.0
+  stem_rake_deg:
+  - 0.0
+  - 0.0
+  forefoot_cut:
+  - 0.0
+  - 0.6
 fixed:
   target_speed_knots: 3.5
+  max_speed_knots: 5.0
+  band_light_kt: 2.0
+  band_heavy_kt: 5.0
   target_displacement: 0.10
   gravity: 9.81
   rho_water: 1025.0
@@ -73,6 +88,8 @@ fixed:
   payload_cg_z: 0.30
   hull_mass_floor_kg: 20.0
   fouling_cf_mult: 1.25
+  draft_free_m: 1.0
+  draft_logistics_per_m: 0.3
 weights:
   w1: 1.0
   w2: 0.5
@@ -86,6 +103,12 @@ weights:
   w8: 0.35
   w9: 0.5
   fom_drag_reference_n: 45.0
+  band_light_wt: 0.25
+  band_medium_wt: 0.45
+  band_heavy_wt: 0.30
+  w_mission_drive: 1.2
+  w_gust: 0.6
+  w_leeway: 0.5
 optimization:
   n_initial: 80
   n_iter: 300

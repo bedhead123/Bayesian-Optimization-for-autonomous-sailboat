@@ -5,9 +5,9 @@ bounds:
   Cp: [0.55, 0.60]         # PYD upwind optimum ~0.55; Delft-series validity 0.519-0.599
   Cm: [0.78, 0.90]         # keep full midship for volume with narrow beam
   LCB: [45.0, 56.0]        # PYD p.87: LCB 3.5-4.5% aft of midship at Fn 0.35 (was 30-60 — allowed bow-heavy lee helm)
-  D_keel: [0.45, 0.65]     # Review T/L 0.15-0.3 fleet band → T_total ≤ 0.72 m at 2.4 m LWL (was 0.9-1.9 = T/L 0.94!)
+  D_keel: [0.45, 2.50]     # INSANE MODE: max 2.5 m fin (T/L gate + drag price it; RealityCheck caps T_total at LWL)
   keel_chord: [0.18, 0.26] # PYD Fig 6.38: keel area 1.9-3.0% of SA at reduced depth (was 0.16-0.22, 4x oversized)
-  bulb_vol: [0.0015, 0.0025] # ballast lives IN the bulb at lowest VCG (PYD Ch.6 bulb keels)
+  bulb_vol: [0.002, 0.0065] # ballast lives IN the bulb at lowest VCG (PYD Ch.6 bulb keels); sized to hold ballast_frac lead
   bulb_pos: [0.30, 0.50]
   E: [0.28, 0.40]          # Rebalanced survive-not-thrive: lower freeboard reduces deck slab (L/B 2:1 -> ~2.5); reserve still passes at 0.40
   flare: [10.0, 24.0]      # Rebalanced: cap midship flare 35->24 to tame deck beam; storm reserve via structure not flare
@@ -16,9 +16,16 @@ bounds:
   keel_rake: [15.0, 30.0]  # deg — Review §3.3.2: USNA ~30° aft-swept LE for weed/net shedding (was 0.001-0.02 = vertical keel)
   ballast_frac: [0.35, 0.55] # PYD p.100 fleet 0.25-0.50 (was 0.60-0.75, corner-pinned every finalist)
   wingsail_pos: [0.30, 0.75]
+  sheer_bow: [0.0, 0.0]    # PINNED flat deck directive (was [0,0.25] kick)
+  sheer_stern: [0.0, 0.0]  # PINNED flat deck directive (was [0,0.12] kick)
+  stem_rake_deg: [0.0, 0.0] # PINNED flat deck directive (was [0,25] rake)
+  forefoot_cut: [0.0, 0.6] # fleet-standard transoceanic cutaway: fraction of local T removed at stem, 0.20 LWL extent
 
 fixed:
   target_speed_knots: 3.5   # PYD: Cp 0.55 tuned to Fn 0.35; Cao Fanhai-T2 (LDR 4.6) maxed at 3.2 kn at 4 kn+ LDR 5.2
+  max_speed_knots: 5.0  # user-stated boat max — heavy band sails here (Fn ~0.53)
+  band_light_kt: 2.0  # drift speed for 5 kt wind band
+  band_heavy_kt: 5.0  # breeze-on speed for 22 kt band (= max)
   target_displacement: 0.10 # 100 kg → LDR 5.2 at 2.4 m (was 0.14 → LDR 4.6 on the Fn 0.45 barrier); Sailbuoy 60 kg/2.0 m
   use_nurbs_geometry: true
   use_nurbs_gz: true
@@ -39,20 +46,30 @@ fixed:
   payload_cg_z: 0.30
   hull_mass_floor_kg: 20.0  # structural floor — Fanhai-T2 optimized hull 38.7 kg at 2.0 m; prevents fake hull mass
   fouling_cf_mult: 1.25     # Review §7.2: long-duration drag penalty (barnacles 2-3x viscous; Sailbuoy 118-day crossing)
+  draft_free_m: 1.0  # ramp/trailer launchable without crane (Bug #169)
+  draft_logistics_per_m: 0.3  # FoM per meter of draft over free (judgment, sens-tested; benefits can outweigh it)
+  structural_allowable_stress_pa: 600000000.0  # CARBON primary structure ultimate tensile (woven carbon/epoxy); layup = Kevlar outer (impact) + glass general + carbon structure + metal frame (Bug #168)
+  structural_density_kg_m3: 1600.0  # carbon/epoxy composite density for root laminate mass (Bug #168)
 
-weights:
-  w1: 1.8   # was 1.0 — pay for 3.5kt drag (normalized via fom_drag_reference_n)
-  w2: 0.25  # was 0.5 — stability via deep keel not fat beam
-  w3: 0.6   # keep self-right
-  w4: 2.0
-  w5: 0.8   # helm soft 30° reward (hard signed-lead gate in constraints.py)
-  w6: 0.5
-  w7: 0.10  # survive-not-thrive: reduced storm-accel weight (was 0.2); storm still shapes via tanh but doesn't dominate light-water drag (w1=1.8)
-  w8: 0.35  # survive-not-thrive: reduced hull-stress weight (was 0.9); 50ft slam survivability via reinforcement/damping, not hull contortion; retains gentle gradient for small drag -> large slam gain
-  w9: 0.5
-  stability_normalization: 30.0
-  light_wind_bonus: 1.2  # not-overbuilt requirement — light-wind mobility hard-enforced
-  fom_drag_reference_n: 45.0  # R_REF so w1/Rt spans ~0.3-0.5 FoM, not 0.004 (was drowned by saturated constants)
+weights:  # JUDGMENTS (Bug #168): mission-value exchange rates, not physics. Stated openly; sens-tested ±50% in test_plan_impl.
+  w1: 1.8   # drag weight (normalized via fom_drag_reference_n)
+  w2: 0.25  # stability weight (single MM term; self-right is gate-only)
+  w3: 0.6   # UNUSED in FoM as of Bug #168 (kept for compat; self-right is gate-only)
+  w4: 2.0   # accel penalty weight
+  w5: 0.8   # helm soft penalty (hard signed-lead gate in constraints.py)
+  w6: 0.5   # capsize margin bonus scale (tanh)
+  w7: 0.10  # storm-accel bonus scale (tanh)
+  w8: 0.35  # slam bonus scale (tanh)
+  w9: 0.5   # inverted-pressure bonus scale (tanh)
+  stability_normalization: 30.0  # legacy, unused by MM stability term
+  light_wind_bonus: 1.2  # light-wind mobility bonus scale (judgment)
+  fom_drag_reference_n: 45.0  # R_REF so w1/Rt spans ~0.3-0.5 FoM (judgment: sets drag exchange rate)
+  band_light_wt: 0.25  # 5 kt drift mobility (mission: ocean crossing, mostly reach/run)
+  band_medium_wt: 0.45  # 10-12 kt working band
+  band_heavy_wt: 0.30  # 22 kt breeze + gust readiness (must sum to 1)
+  w_mission_drive: 1.2  # reach/run drive per band vs Rt (judgment)
+  w_gust: 0.6  # heavy-band heel-margin reward (judgment)
+  w_leeway: 0.5  # VMG-priced leeway slope past 4 deg (judgment)
 
 optimization:
   n_initial: 80

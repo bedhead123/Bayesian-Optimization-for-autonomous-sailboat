@@ -49,7 +49,7 @@ except ImportError:
 
 
 class CorrectionMLP:
-    def __init__(self, input_dim: int = 17, hidden_dim: int = 64):
+    def __init__(self, input_dim: int = 21, hidden_dim: int = 64):
         if not TORCH_AVAILABLE:
             raise ImportError("torch not available")
         self.net = nn.Sequential(

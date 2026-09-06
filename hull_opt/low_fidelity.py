@@ -168,6 +168,35 @@ def _margin_bonus_clip(v):
     return float(np.tanh(v))
 
 
+def draft_logistics_cost(x_dict: dict, config) -> float:
+    """Priced inconvenience of draft (Bug #169), not a wall.
+
+    Ramp-launchable draft (fixed.draft_free_m) is free; over that, handling
+    cost ramps linearly at fixed.draft_logistics_per_m FoM per meter.
+    Benefits CAN outweigh it — BO finds the equilibrium. Pure function.
+    """
+    try:
+        t_tot = float(x_dict.get("T_canoe", 0.0)) + float(x_dict.get("D_keel", 0.0))
+        free = float(getattr(config.fixed, "draft_free_m", 1.0))
+        rate = float(getattr(config.fixed, "draft_logistics_per_m", 0.3))
+        return max(0.0, rate * (t_tot - free))
+    except Exception:
+        return 0.0
+
+
+def leeway_penalty_deg(heavy_leeway_deg: float, config) -> float:
+    """VMG-priced leeway (Bug #169): degrees past the 4° designer norm
+    (PYD: 3-5° ideal helm balance) cost drive on every point of sail.
+    Linear slope w_leeway = stated judgment. Pure function."""
+    try:
+        hl = float(heavy_leeway_deg)
+        if not np.isfinite(hl) or hl <= 4.0:
+            return 0.0
+        return float(getattr(config.weights, "w_leeway", 0.5)) * (hl - 4.0) / 4.0
+    except Exception:
+        return 0.0
+
+
 def evaluate_low_fidelity(design_vector: np.ndarray, config,
                           output_dir: Optional[str] = None,
                           drag_factor: float = 1.0,
@@ -291,13 +320,20 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
         # so the FoM tracks reality and the SPH calibration band is reachable.
         nabla_ref = hydro.get("underwater_volume",
                               hydro.get("nabla", config.fixed.target_displacement))
+        from hull_opt.michell import delft_cap_frac as _delft_cap_frac
+        _Fn_des = float(speed_ms) / max(1e-9, (config.fixed.gravity * max(1e-9, hull_lwl)) ** 0.5)
         Rw = capped_wave_resistance(Rw_raw, nabla_ref, config.fixed.rho_water,
-                                    config.fixed.gravity)
-        # Appendage wetted area: keel (both sides + tip) and bulb surface —
-        # the old hull-only slice omitted ~half the viscous surface (AGENTS:
-        # geometry.py claimed "<0.1%" impact — false for wetted area).
-        A_app = (2.0 * D_keel * 0.75 * keel_chord * 1.15
-                 + 3.8 * np.pi * (max(1e-9, 3.0 * x_dict["bulb_vol"] / (4.0 * np.pi))) ** (2.0 / 3.0))
+                                    config.fixed.gravity,
+                                    cap_frac=_delft_cap_frac(_Fn_des))
+        # Appendage wetted area: keel (both sides + tip, root fillet) and full
+        # ellipsoid bulb surface — the old hull-only slice omitted ~half the
+        # viscous surface. Bulb: full ellipsoid 4π(a²b²+a²c²+b²c²)/3 approx via
+        # Knud Thomsen p=1.6 on semi-axes (a=x, b=y, c=z).
+        _br = (max(1e-9, 3.0 * x_dict["bulb_vol"] / (4.0 * np.pi))) ** (1.0 / 3.0)
+        _ba, _bb, _bc = _br * 1.333, _br, _br * 0.8
+        _bulb_s = 4.0 * np.pi * (((_ba * _bb) ** 1.6 + (_ba * _bc) ** 1.6 + (_bb * _bc) ** 1.6) / 3.0) ** (1.0 / 1.6)
+        A_app = (2.0 * D_keel * 0.75 * keel_chord * 1.15 * 1.06
+                 + _bulb_s)
         Rt, Rf, Rw_out = compute_total_resistance(
             speed_ms, wetted_area, hull_lwl,
             rho=config.fixed.rho_water, nu=config.fixed.nu_water,
@@ -489,16 +525,20 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
     else:
         try:
             righting_energy = constraints.get("righting_energy", 0.0)
-            # De-saturated stability term: scale against 4x the min-righting
-            # energy gate so weak/medium designs carry gradient (the old
-            # RE/30 capped at 2.0 was 2.000 for EVERY feasible design and
-            # w2 was a constant — audit A3).
-            re_ref = max(1.0, 4.0 * getattr(config.validation, "min_righting_energy", 40.0))
-            stability_index = min(righting_energy / re_ref, 1.25)
+            # Bug #168: single stability term, Michaelis-Menten saturation.
+            # The old stack (w2*min(RE/160,1.25) + w3*self_right + w6 capsize
+            # + drive/storm/VMG/leeway tanhs) rewarded the SAME GZ signal six
+            # times with six saturating nonlinearities — depth upside capped
+            # while depth costs grew unbounded. Now: ONE continuous term.
+            # Half-saturation at 2x the survival threshold (80 J) is a stated
+            # mission judgment (diminishing returns past self-righting are
+            # real capsize mechanics; the 2x multiple is a choice, sens-tested
+            # in test_plan_impl). Self-righting stays a hard gate, not FoM.
+            re_half = 2.0 * max(1.0, getattr(config.validation, "min_righting_energy", 40.0))
+            re_val = max(0.0, righting_energy) if np.isfinite(righting_energy) else 0.0
+            stability_index = re_val / (re_val + re_half)
             if not np.isfinite(stability_index):
                 stability_index = 0.0
-            else:
-                stability_index = max(0.0, stability_index)
             result.stability_index = stability_index
 
             # No crew comfort roll band penalty (autonomous vessel)
@@ -530,7 +570,9 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
                 helm_penalty = (helm_worst / max_helm) * config.weights.w5
 
             # Light-wind bonus for bimodal El Niño conditions
-            # Designs with good sail area-to-drag at low speed get bonus
+            # Designs with good sail area-to-drag at low speed get bonus.
+            # Deep fins pay here too: the fin is wetted at ALL speeds
+            # (Bug #166 — the old T_canoe-only call gave depth a free ride).
             light_wind_bonus = 0.0
             if hasattr(config.weights, 'light_wind_bonus') and config.weights.light_wind_bonus > 0:
                 # Lower wave resistance at low speed = better light-wind performance
@@ -540,22 +582,36 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
                         half_breadth_func,
                         LWL=hull_lwl,
                         B=x_dict["BWL"],
-                        T=x_dict["T_canoe"],
+                        T=x_dict["T_canoe"] + x_dict.get("D_keel", 0.0),
                         speed_ms=speed_low_ms,
                         rho=config.fixed.rho_water,
                         g=config.fixed.gravity,
                     )
-                    # Same Delft residuary cap as the design speed (consistency
-                    # across every Rt site — audit A4).
+                    # Same Fn-based Delft envelope as the design speed (one
+                    # physics, one curve — Bug #171 killed the 0.02/0.035 pair).
+                    _Fn_low = float(speed_low_ms) / max(1e-9, (config.fixed.gravity * max(1e-9, hull_lwl)) ** 0.5)
                     Rw_low = capped_wave_resistance(
                         Rw_low_raw, nabla_ref, config.fixed.rho_water,
-                        config.fixed.gravity, cap_frac=0.02)
+                        config.fixed.gravity,
+                        cap_frac=_delft_cap_frac(_Fn_low))
                     # Normalize: lower Rw at low speed → higher bonus
                     rw_norm = min(Rw_low / max(1e-10, config.fixed.target_displacement), 10.0)
                     light_wind_bonus = config.weights.light_wind_bonus * max(0, 1.0 - rw_norm / 5.0)
                 except Exception:
                     pass
 
+            # Bug #168: no feasible-path draft debit. The old quadratic/cubic
+            # penalty was tuned backwards from "dethrone design 157" — an
+            # outcome target, not physics. Bug #169: depth logistics is a
+            # priced inconvenience (draft_logistics_cost below), never a
+            # per-Newton tax and never a wall — only T_total > LWL fails
+            # (physical cap, constraints.py). Depth still pays honestly via
+            # wetted/induced drag, light-wind Rw at full draft, and root
+            # structure mass+VCG.
+
+            # w3 (self-right) is gate-only as of Bug #168: it duplicated the
+            # GZ reward already carried by stability_index. Computed for the
+            # log; not added to FoM.
             self_right_score = constraints.get("self_righting", 0.0)
             if not np.isfinite(self_right_score):
                 self_right_score = 0.0
@@ -579,8 +635,10 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
                     cl_keel = (2.0 * np.pi * AR_e / max(1e-9, AR_e + 2.0)) * np.radians(min(lw, 12.0))
                     q = 0.5 * config.fixed.rho_water * speed_ms ** 2
                     ri = q * A_plan * cl_keel ** 2 / max(1e-9, np.pi * AR_e)
-                    raw = 0.12 * (result.rt_friction + result.rt_wave) * min(
-                        1.0, getattr(config.rapid_validation, "ops_Hs", 1.2) / 1.2)
+                    # Added resistance is second-order in wave height
+                    # (Bug #171: was linear, overpredicting moderate seas ~2x).
+                    _hsr = min(1.0, getattr(config.rapid_validation, "ops_Hs", 1.2) / 1.2)
+                    raw = 0.12 * (result.rt_friction + result.rt_wave) * _hsr ** 2
                     rt_ocean = float(result.rt_total) + ri + raw
                 except Exception:
                     rt_ocean = float(result.rt_total)
@@ -593,7 +651,6 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
             result.fom = (
                 w.w1 * (drag_ref / Rt_safe)
                 + w.w2 * stability_index
-                + w.w3 * self_right_score
                 + light_wind_bonus
                 - w.w4 * accel_penalty
                 - disp_penalty
@@ -610,28 +667,86 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
                 result.fom += w8 * _margin_bonus_clip(result.rapid.margins.get("slam_pressure", -1))
                 result.fom += w9 * _margin_bonus_clip(result.rapid.margins.get("inverted_pressure", -1))
 
-            # System-level balance polar bonus: reward designs with good drive
-            # across all points of sail and clean storm heel margin. Keep
-            # bounded via tanh so GP gradient survives.
+            # System-level mission bonus: ocean crossing lives on reach/run,
+            # scored in three wind bands through the SAME balance solver
+            # (Bug #169). Stored result.balance is the 10 kt medium band;
+            # light (5 kt) + heavy (22 kt) are scoring-only extras (<5 ms each).
+            # Reach drive per band vs Rt: deep keels earn here (drive at heel
+            # with small leeway); stubby keels pay in leeway/heel. Gust
+            # readiness = heavy-band heel headroom with a REAL gradient
+            # (replaces the old saturated storm tanh). Upwind VMG kept for
+            # wind shifts. Leeway priced linearly past the 4° designer norm
+            # (PYD: 3-5° ideal) instead of the old 0.2-capped token.
             if result.balance is not None:
                 bal = result.balance
-                # Drive efficiency: mean drive vs total resistance
-                mean_drive = bal.get("mean_drive_ops_N", 0.0)
-                if np.isfinite(mean_drive) and Rt_safe > 0:
-                    drive_eff = float(np.tanh(mean_drive / max(50.0, Rt_safe)))
-                    result.fom += 0.6 * drive_eff
-                # Storm heel margin bonus (survival margin beyond feathered balance)
-                storm_margin = bal.get("heel_margin_storm", -1.0)
-                if np.isfinite(storm_margin):
-                    result.fom += 0.4 * float(np.tanh(storm_margin))
-                # Upwind VMG bonus
+                band_wts = (
+                    float(getattr(w, "band_light_wt", 0.25)),
+                    float(getattr(w, "band_medium_wt", 0.45)),
+                    float(getattr(w, "band_heavy_wt", 0.30)),
+                )
+                ws = sum(band_wts)
+                band_wts = tuple(b / ws for b in band_wts) if ws > 0 else (0.25, 0.45, 0.30)
+                w_md = float(getattr(w, "w_mission_drive", 1.2))
+                w_gu = float(getattr(w, "w_gust", 0.6))
+                mission_drive = 0.0
+                gust_margin = float(bal.get("heel_margin_ops", 0.0))
+                heavy_leeway = float(bal.get("worst_leeway_ops_deg", 0.0))
+                try:
+                    med_reach = float(bal.get("reach_drive_ops_N", bal.get("mean_drive_ops_N", 0.0)))
+                    if np.isfinite(med_reach) and med_reach > 0:
+                        mission_drive += band_wts[1] * med_reach / Rt_safe
+                    # Per-band boat speeds (Bug #169): drift at 2 kt, work at
+                    # target, breeze-on at the 5 kt user max — never score a
+                    # band at a speed the boat can't sail.
+                    kt2ms = 0.514444
+                    v_light = float(getattr(config.fixed, "band_light_kt", 2.0)) * kt2ms
+                    v_heavy = float(getattr(config.fixed, "band_heavy_kt", 5.0)) * kt2ms
+                    light = evaluate_balance_polar(
+                        x_dict, config, gz, hydro,
+                        boat_speed_ms=v_light, tws_ops_kt=5.0)
+                    l_reach = float(light.get("reach_drive_ops_N", 0.0))
+                    if np.isfinite(l_reach) and l_reach > 0:
+                        mission_drive += band_wts[0] * l_reach / Rt_safe
+                    heavy = evaluate_balance_polar(
+                        x_dict, config, gz, hydro,
+                        boat_speed_ms=v_heavy, tws_ops_kt=22.0)
+                    h_reach = float(heavy.get("reach_drive_ops_N", 0.0))
+                    if np.isfinite(h_reach) and h_reach > 0:
+                        mission_drive += band_wts[2] * h_reach / Rt_safe
+                    gm = heavy.get("heel_margin_ops", gust_margin)
+                    if np.isfinite(gm):
+                        gust_margin = float(gm)
+                    hl = heavy.get("worst_leeway_ops_deg", heavy_leeway)
+                    if np.isfinite(hl):
+                        heavy_leeway = float(hl)
+                except Exception:
+                    pass
+                result.fom += w_md * mission_drive
+                result.fom += w_gu * gust_margin
+                # Upwind VMG bonus (wind shifts happen mid-ocean)
                 vmg_up = bal.get("vmg_up_N", 0.0)
                 if np.isfinite(vmg_up) and vmg_up > 0:
                     result.fom += 0.3 * float(np.tanh(vmg_up / 50.0))
-                # Leeway penalty (soft, via FoM)
-                worst_leeway = bal.get("worst_leeway_ops_deg", 0.0)
-                if np.isfinite(worst_leeway) and worst_leeway > 6.0:
-                    result.fom -= 0.2 * float(np.tanh((worst_leeway - 6.0) / 6.0))
+                # Leeway penalty, VMG-priced helper (linear past 4° norm)
+                result.fom -= leeway_penalty_deg(heavy_leeway, config)
+                result.mission_drive = mission_drive
+                result.gust_margin = gust_margin
+                result.heavy_leeway_deg = heavy_leeway
+                # Persist mission scalars into constraints (→ DB constraint_values
+                # JSON → results.md/CSV), same pattern as the balance scalars.
+                constraints["mission_drive"] = mission_drive
+                constraints["gust_margin"] = gust_margin
+                constraints["heavy_leeway_deg"] = heavy_leeway
+
+            # Draft logistics (Bug #169): inconvenience with a price, not a
+            # wall (helper above). Absolute physical cap (T_total > LWL)
+            # stays a hard gate in constraints.py.
+            try:
+                result.draft_logistics_cost = draft_logistics_cost(x_dict, config)
+                result.fom -= result.draft_logistics_cost
+                constraints["draft_logistics_cost"] = result.draft_logistics_cost
+            except Exception:
+                result.draft_logistics_cost = 0.0
 
             if not np.isfinite(result.fom):
                 logger.warning(f"Non-finite FoM: {result.fom}, resetting to large penalty")
@@ -646,6 +761,12 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
                 "helm_aft_deg": result.helm_aft_deg,
                 "helm_penalty": helm_penalty,
             }, "D")
+            try:
+                result.physical_params["struct_mass_kg"] = hydro.get("struct_mass_kg")
+                result.physical_params["ballast_tip_kg"] = hydro.get("ballast_tip_kg")
+                result.physical_params["ballast_fin_kg"] = hydro.get("ballast_fin_kg")
+            except Exception:
+                pass
         except Exception as e:
             result.error_code = f"E_FOM:{e}"
             # Fail-closed: a feasible design whose FoM crashed must not be
@@ -987,14 +1108,23 @@ def _compute_peak_accel(heave_rao, pitch_rao, omega, config,
             if fi <= 0:
                 continue
             sigma = 0.07 if fi <= fp else 0.09
-            alpha = 5.0 / 16.0
+            # Bug #171 (regression of Bug #71): see rapid_gates.py — 0.0081.
+            alpha = 0.0081
             beta = -1.25 * (fp / fi) ** 4
             gamma_term = gamma ** np.exp(-0.5 * ((fi - fp) / (sigma * fp)) ** 2)
             S_Hz[i] = alpha * Hs ** 2 * (fp / fi) ** 4 * np.exp(beta) * gamma_term / fi
 
         # Convert JONSWAP from Hz to rad/s: S(ω) = S(f) / (2π)
-        # because S(ω) dω = S(f) df with dω = 2π df
+        # because S(ω) dω = S(f) df with dω = 2π df.
+        # Bug #171: self-normalize to m0 = (Hs/4)^2 (see rapid_gates.py).
         S = S_Hz / (2.0 * np.pi)
+        try:
+            _m0 = float(np.trapezoid(S, omega_sp))
+            _tgt = (float(Hs) / 4.0) ** 2
+            if _m0 > 0 and np.isfinite(_m0):
+                S = S * (_tgt / _m0)
+        except Exception:
+            pass
 
         heave_interp = np.interp(omega_sp, omega, heave_rao, left=0, right=0)
         pitch_interp = np.interp(omega_sp, omega, pitch_rao, left=0, right=0)

@@ -35,6 +35,10 @@ DESIGN = np.array([
     0.005,  # keel_rake
     0.55,   # ballast_frac
     0.42,   # wingsail_pos
+    0.08,   # sheer_bow
+    0.04,   # sheer_stern
+    5.0,    # stem_rake_deg
+    0.35,   # forefoot_cut
 ])
 
 # Raw-space design vector — DESIGN values are already valid raw-space [-10, +10]
@@ -48,7 +52,10 @@ def test_design_vector_to_dict():
     assert d["Cp"] == 0.60
     assert d["ballast_frac"] == 0.55
     assert d["wingsail_pos"] == 0.42
-    assert len(d) == 17
+    assert d["sheer_bow"] == 0.08
+    assert d["stem_rake_deg"] == 5.0
+    assert d["forefoot_cut"] == 0.35
+    assert len(d) == 21
 
 
 def test_waterline_half_breadth():
