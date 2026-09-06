@@ -240,7 +240,7 @@ def test_mission_columns_reach_report(tmp_path):    # Bug #169 wiring: mission s
     from hull_opt.config import load_config
     cfg = load_config("config.yaml")
     cv = {"mission_drive": 1.23, "gust_margin": 0.4, "heavy_leeway_deg": 5.0,
-          "draft_logistics_cost": 0.35, "T_over_L": 0.32}
+          "draft_logistics_cost": 0.35, "T_over_L": 0.32, "mission_fom": 6.25}
     row = {"iter": 0, "feasible": 1, "fom": 2.5, "rt_total": 38.0,
            "constraint_values": json.dumps(cv), "constraint_violations": "[]",
            "physical_params": json.dumps(_xdict()), "design_vector": "[]",
@@ -254,10 +254,11 @@ def test_mission_columns_reach_report(tmp_path):    # Bug #169 wiring: mission s
     md = (tmp_path / "results.md").read_text()
     csv_text = (tmp_path / "results.csv").read_text()
     for col in ("mission_drive", "gust_margin", "heavy_leeway_deg",
-                "draft_logistics_cost"):
+                "draft_logistics_cost", "mission_fom"):
         assert col in md
         assert col in csv_text.splitlines()[0]
     assert "1.2300" in md  # value flows through, not just the header
+    assert "6.2500" in md  # mission_fom from cv fallback
 
 
 def test_sigma_deg_capped():

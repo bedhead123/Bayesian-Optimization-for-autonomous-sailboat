@@ -203,6 +203,15 @@ class OptimizationDatabase:
                 self._conn.execute(f"ALTER TABLE designs ADD COLUMN {col} REAL")
             except Exception:
                 pass
+        # Migration: mission-FoM rescore columns (Bug #171 follow-up: the
+        # CSV "lagged" because rescores lived only in chat). Campaign fom
+        # is NEVER overwritten — mission_fom sits alongside with provenance.
+        for col in ("mission_fom", "mission_drive", "gust_margin",
+                    "heavy_leeway_deg", "draft_logistics_cost"):
+            try:
+                self._conn.execute(f"ALTER TABLE designs ADD COLUMN {col} REAL")
+            except Exception:
+                pass
         try:
             self._conn.execute("ALTER TABLE designs ADD COLUMN parametric_roll INTEGER")
         except Exception:
@@ -623,6 +632,32 @@ class OptimizationDatabase:
             _c(balance.get("worst_leeway_ops_deg")),
             _c(balance.get("mean_drive_ops_N")),
             _c(balance.get("vmg_up_N")),
+            design_id,
+        ))
+        self._conn.commit()
+
+    def update_design_mission(self, design_id: int, mission: dict) -> None:
+        """Store mission-FoM rescore for a design. Never touches campaign fom."""
+        if not isinstance(mission, dict):
+            return
+        import numpy as _np
+
+        def _c(v):
+            try:
+                return None if v is None or not _np.isfinite(v) else float(v)
+            except Exception:
+                return None
+        self._conn.execute("""
+            UPDATE designs SET
+                mission_fom = ?, mission_drive = ?, gust_margin = ?,
+                heavy_leeway_deg = ?, draft_logistics_cost = ?
+            WHERE id = ?
+        """, (
+            _c(mission.get("mission_fom")),
+            _c(mission.get("mission_drive")),
+            _c(mission.get("gust_margin")),
+            _c(mission.get("heavy_leeway_deg")),
+            _c(mission.get("draft_logistics_cost")),
             design_id,
         ))
         self._conn.commit()

@@ -154,7 +154,7 @@ def generate_summary_plots(db: OptimizationDatabase, output_dir: Path, config):
 
 _PARAM_COLUMNS = design_vector_names()
 
-_REPORT_COLUMNS = ["iter", "feasible", "fom",
+_REPORT_COLUMNS = ["iter", "feasible", "fom", "mission_fom",
                    "LWL", "BWL", "T_canoe", "Cp", "Cm", "LCB", "D_keel",
                    "keel_chord", "bulb_vol", "bulb_pos", "E", "flare",
                    "deadrise", "bilge_r", "keel_rake", "ballast_frac",
@@ -245,6 +245,10 @@ def generate_results_report(db, config, output_dir: Path) -> None:
             "iter": d.get("iter"),
             "feasible": bool(d.get("feasible")),
             "fom": d.get("fom"),
+            # Mission rescore (Bug #171: CSV lagged because rescores lived
+            # only in chat). DB column first, live-eval cv fallback.
+            "mission_fom": (d.get("mission_fom") if d.get("mission_fom") is not None
+                            else cv.get("mission_fom")),
             "rt_total": d.get("rt_total"),
             "rt_wave": d.get("rt_wave"),
             "rt_friction": d.get("rt_friction"),
@@ -1723,7 +1727,11 @@ def _clean_slate(output_dir: Path, db_path: Path):
     # reference storms.
     (output_dir / "gpu.lock").unlink(missing_ok=True)
 
-    # Stale STL files at top level
+    # Stale STL files: current layout finalists/design_<id>/boat.stl
+    # plus legacy loose final_design_*.stl from older runs.
+    _fin = output_dir / "finalists"
+    if _fin.exists():
+        shutil.rmtree(_fin, ignore_errors=True)
     for p in output_dir.glob("final_design_*.stl"):
         p.unlink(missing_ok=True)
 
@@ -1977,7 +1985,11 @@ def main():
             except Exception:
                 pass
             if stl_path and Path(stl_path).exists():
-                final_path = output_dir / f"final_design_{d['id']}.stl"
+                # Organized layout (Bug #171 follow-up): finalists live under
+                # finalists/design_<id>/boat.stl, not loose at output root.
+                final_dir = output_dir / "finalists" / f"design_{d['id']}"
+                final_dir.mkdir(parents=True, exist_ok=True)
+                final_path = final_dir / "boat.stl"
                 shutil.copy2(stl_path, final_path)
                 logger.info(f"Final CAD: {final_path}")
     else:
