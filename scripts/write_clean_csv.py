@@ -13,7 +13,7 @@ sys.path.insert(0, ".")
 
 COLUMNS = [
     "id", "iter", "mission_fom", "fom",
-    "LWL_m", "BWL_m", "T_canoe_m", "D_keel_m", "keel_chord_m",
+    "LWL_m", "BWL_m", "BWL_measured_m", "T_canoe_m", "D_keel_m", "keel_chord_m",
     "bulb_L", "ballast_frac", "T_over_L", "LDR",
     "GM_m", "AVS_deg", "righting_energy_J",
     "heavy_leeway_deg", "helm_comb_deg", "mission_drive",
@@ -67,12 +67,17 @@ def main():
             pp = json.loads(d.get("physical_params") or "{}")
         except Exception:
             pp = {}
+        try:
+            cv = json.loads(d.get("constraint_values") or "{}")
+        except Exception:
+            cv = {}
         out.append({
             "id": d.get("id"), "iter": d.get("iter"),
             "mission_fom": r3(d.get("mission_fom")),
             "fom": r3(d.get("fom")),
             "LWL_m": r3(pp.get("LWL") or d.get("LWL")),
             "BWL_m": r3(pp.get("BWL")),
+            "BWL_measured_m": r3(cv.get("BWL_measured") or pp.get("BWL")),
             "T_canoe_m": r3(pp.get("T_canoe")),
             "D_keel_m": r3(pp.get("D_keel")),
             "keel_chord_m": r3(pp.get("keel_chord")),

@@ -155,7 +155,7 @@ def generate_summary_plots(db: OptimizationDatabase, output_dir: Path, config):
 _PARAM_COLUMNS = design_vector_names()
 
 _REPORT_COLUMNS = ["iter", "feasible", "fom", "mission_fom",
-                   "LWL", "BWL", "T_canoe", "Cp", "Cm", "LCB", "D_keel",
+                   "LWL", "BWL", "BWL_measured", "T_canoe", "Cp", "Cm", "LCB", "D_keel",
                    "keel_chord", "bulb_vol", "bulb_pos", "E", "flare",
                    "deadrise", "bilge_r", "keel_rake", "ballast_frac",
                    "wingsail_pos", "sheer_bow", "sheer_stern", "stem_rake_deg", "forefoot_cut",
@@ -288,6 +288,8 @@ def generate_results_report(db, config, output_dir: Path) -> None:
             row[c] = cv.get(c)
         for p in _PARAM_COLUMNS:
             row[p] = pp.get(p)
+        # Bug #172-B: built beam (mesh truth) next to the param that wished it.
+        row["BWL_measured"] = cv.get("BWL_measured")
         rows.append(row)
 
     rows.sort(key=lambda r: (not r["feasible"],
@@ -1974,16 +1976,28 @@ def main():
             logger.warning("Some designs failed validation")
 
         for d in top_designs:
-            stl_path = d.get("cad_stl_path")
-            # File-truth: cad_stl_path is hull+deck (GZ/BEM); prefer the
-            # sibling hull_full.stl (keel+bulb, SPH/preview) for final CAD.
+            # Bug #172 follow-up: ship the VALIDATED mesh, not the stale
+            # campaign one. cad_stl_path points at the campaign build dir
+            # (pre-fix geometry); the gates just passed on a fresh mesh in
+            # validation/design_<id>/ — that is the boat that passed.
+            stl_path = None
             try:
-                _cand = Path(stl_path) if stl_path else None
-                _full = _cand.parent / "hull_full.stl" if _cand is not None else None
-                if _full is not None and _full.exists():
-                    stl_path = str(_full)
+                _vfull = output_dir / "validation" / f"design_{d['id']}" / "hull_full.stl"
+                if _vfull.exists():
+                    stl_path = str(_vfull)
             except Exception:
-                pass
+                stl_path = None
+            if stl_path is None:
+                stl_path = d.get("cad_stl_path")
+                # File-truth: cad_stl_path is hull+deck (GZ/BEM); prefer the
+                # sibling hull_full.stl (keel+bulb, SPH/preview) for final CAD.
+                try:
+                    _cand = Path(stl_path) if stl_path else None
+                    _full = _cand.parent / "hull_full.stl" if _cand is not None else None
+                    if _full is not None and _full.exists():
+                        stl_path = str(_full)
+                except Exception:
+                    pass
             if stl_path and Path(stl_path).exists():
                 # Organized layout (Bug #171 follow-up): finalists live under
                 # finalists/design_<id>/boat.stl, not loose at output root.

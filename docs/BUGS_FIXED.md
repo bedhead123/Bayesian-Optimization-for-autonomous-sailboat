@@ -1786,3 +1786,22 @@ This document records every bug found and fixed in the codebase. Future agents s
   8. Reporting mass light by the 15 kg payload vs the CG path (mass non-closure): geometry base now includes payload. Structure centroid corrected to root-heavy −(T+D/3) (was tip-heavy −(T+2D/3); sub-kg effect, fixed for the derivation's honesty).
 - **Verification:** 23/23 plan_impl; golden re-recorded with honest signature (Rt 38.6→24.6 N via Fn cap, storm accel 2.24→1.81 g via normalization, GM/RE/CG unchanged); top-8 rescore under fixed physics re-ranks 152→#1 (6.248), 158→#2 (5.879), 124→#3 (5.790); fast suite green modulo the one pinned-rot test, fixed.
 - **Known open (P2, not this bug):** rig CL double-discount + CE height, Oswald/end-plate factors, Gate 1/4 pass-by-construction thresholds, helm 5° unenforced, Fanhai % cited-not-enforced, AGENTS drift items (NURBS default, SAC cap, thresholds, fast/phase0 weights).
+
+## Bug #172: Built beam ≠ spec beam (photos vs CSV mismatch) + Final CAD shipped stale mesh
+
+- **Severity:** Critical (every design's real beam ~0.74× spec; all beam-priced physics + CSV wrong; shipped CAD wasn't the validated mesh).
+- **Discovery:** User eyeballed forum renders vs MeshLab: skinny vs spec 0.55 m. Mesh measured 0.41 m max underwater.
+- **Root-cause chain:**
+  1. Photos/CSVs disagree → mesh WL beam 0.41 vs BWL param 0.55.
+  2. Two cuts: uniform u-rows straddle the 0.556 planform peak unsampled (~5%), then cubic NURBS corner-cutting at the deadrise/bilge elbow eats ~20% (verified on saved patches: control 0.256 → surface 0.204; tessellation faithful).
+  3. Nothing closed the loop: SAC matches volume only; validators check angles; topside test pins controls, not surface.
+  4. Consumers priced the wish: Delft/Michell/CSV/constraints used `x_dict["BWL"]` (one spot even used stale `B×sac_scale`); only GZ/BEM (mesh-based) saw truth.
+  5. Deepest: BWL was input-only, never measured output. Plus a second live bug found chasing it — Final CAD copied `cad_stl_path` (stale campaign mesh), not the freshly validated mesh, so the shipped boat wasn't the boat that passed gates.
+- **Fix (P/C/B/A + renders):**
+  - C: u-rows include planform peak; v-rows clustered at the WL elbow.
+  - B: `hydro["BWL_measured"]` (mesh slice) + `measured_beam()` helper; all Delft/Michell/roll/slam/gate consumers switched; CSV + report columns.
+  - A: `_beam_sinkage_pass` — y-gain hull breadths to BWL/2, rigid z-shift to target volume (3 damped iters, watertight-guarded); `sinkage_m` recorded; `eff_draft()` threads re-floated draft into CG/ballast/Michell/constraints/logistics (mesh consumers exact by construction). 152 closes: 0.41 → 0.547 beam, 0.1005 m³, sinkage −12 mm.
+  - P: equal-aspect renders (`set_box_aspect` — old shots stretched beam ~25%).
+  - Final CAD now ships `validation/design_<id>/hull_full.stl` (the mesh that passed), campaign sibling only as fallback.
+  - output/ reorganized: `finalists/design_<id>/boat.stl`, per-dir MANIFEST/FILES, top-level README map.
+- **Verification:** new closure proof (rebuild 152 → 0.547/0.1005); `test_measured_beam_and_eff_draft`, report-column test extended; 2 stale tests updated to new behavior (u-row count, deck height follows sinkage); golden re-recorded (Rt 24.6→31.1, GM/RE up — wider honest hull); top-8 rescored (124 5.465 ≈ 152 5.431, deep boats healthy); validation re-run 5/5 incl. Gate 1 (fixed missing import found en route); forum package re-rendered from validated mesh.

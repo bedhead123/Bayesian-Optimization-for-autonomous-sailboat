@@ -201,6 +201,47 @@ def compute_gz_area(gz_curve: np.ndarray, lo_deg: float = 0.0,
     return float(_trapz(gz_positive, angle_rad))
 
 
+def eff_draft(x_dict: dict, hydro: dict | None) -> float:
+    """Effective canoe draft after re-float (Bug #172-A).
+
+    The mesh is beam-closed then sunk/floated to hit displacement; the
+    rigid z-shift (hydro['sinkage_m'], >0 = floated shallower) moves every
+    draft-referenced depth. Analytic consumers must use this, not the raw
+    param; mesh consumers (GZ slice, BEM, displacement) are exact already.
+    Pure function."""
+    try:
+        base = float(x_dict.get("T_canoe", 0.3))
+    except Exception:
+        base = 0.3
+    try:
+        s = float((hydro if isinstance(hydro, dict) else {}).get("sinkage_m", 0.0))
+        if np.isfinite(s):
+            return base - s
+    except Exception:
+        pass
+    return base
+
+
+def measured_beam(x_dict: dict, hydro: dict | None) -> float:
+    """Beam that was actually built (Bug #172-B).
+
+    The BWL param sculpts the control net but the surface undershoots it,
+    so physics (Delft ratios, Michell B, roll gyradius) must price
+    hydro['BWL_measured'] (mesh slice at z=0), falling back to the param
+    only when no mesh was measured. Pure function."""
+    try:
+        if isinstance(hydro, dict):
+            m = float(hydro.get("BWL_measured", 0.0) or 0.0)
+            if np.isfinite(m) and m > 0.05:
+                return m
+    except Exception:
+        pass
+    try:
+        return float(x_dict.get("BWL", 0.5))
+    except Exception:
+        return 0.5
+
+
 def compute_avs(gz_curve: np.ndarray) -> float:
     """Angle of vanishing stability: first downward zero-crossing of GZ
     after the upright positive lobe; max angle in the curve if none,
@@ -302,8 +343,10 @@ def _ballast_struct_split(total0: float, bulb_mass: float, keel_mass: float,
 
 
 def compute_cg_z(x_dict: dict, nabla: Optional[float] = None,
-                 config=None) -> float:
-    T_hull = x_dict.get("T_canoe", 0.3)
+                 config=None, hydro: dict | None = None) -> float:
+    # Bug #172-A: re-floated draft (mesh shifted by sinkage_m); callers
+    # without a hydro dict get the param draft (mm-scale residual, stated).
+    T_hull = eff_draft(x_dict, hydro)
     D_keel = x_dict.get("D_keel", 1.0)
     ballast_frac = x_dict.get("ballast_frac", 0.30)
     bulb_vol = x_dict.get("bulb_vol", 0.0)
@@ -372,7 +415,8 @@ def compute_cg_z(x_dict: dict, nabla: Optional[float] = None,
     return cg_z
 
 
-def compute_cg_x(x_dict: dict, config, cb_x: float = 0.0) -> float:
+def compute_cg_x(x_dict: dict, config, cb_x: float = 0.0,
+                 hydro: dict | None = None) -> float:
     """Longitudinal CG in mesh frame (bow=0, stern=LWL).
 
     Hull mass at CB_x (from hydro; fallback (LCB/100)·LWL), keel+ballast at
@@ -382,7 +426,7 @@ def compute_cg_x(x_dict: dict, config, cb_x: float = 0.0) -> float:
     from hull_opt.rig import sail_pos_x
 
     LWL = x_dict.get("LWL", 2.4)
-    T_hull = x_dict.get("T_canoe", 0.3)
+    T_hull = eff_draft(x_dict, hydro)  # Bug #172-A
     D_keel = x_dict.get("D_keel", 1.0)
     ballast_frac = x_dict.get("ballast_frac", 0.30)
     bulb_vol = x_dict.get("bulb_vol", 0.0)
@@ -452,7 +496,7 @@ def compute_lumped_inertia(x_dict: dict, hydro: dict, config=None) -> np.ndarray
     Returns a 6x6 numpy array (kg·m²) — wrap with an xarray DataArray of
     dims ('influenced_dof', 'radiating_dof') at the call site.
     """
-    T_hull = float(x_dict.get("T_canoe", 0.3))
+    T_hull = eff_draft(x_dict, hydro)  # Bug #172-A: re-floated draft
     D_keel = float(x_dict.get("D_keel", 1.0))
     LWL = float(x_dict.get("LWL", 2.4))
     BWL = float(x_dict.get("BWL", 0.5))

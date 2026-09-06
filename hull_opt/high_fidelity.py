@@ -87,7 +87,7 @@ def _validate_single(design_vector: np.ndarray, design_id: int,
         return result
 
     hull_lwl = float(x_dict.get("LWL", config.fixed.LWL))
-    B = x_dict["BWL"]
+    B = x_dict["BWL"]  # placeholder; re-resolved to measured beam after generate_hull below
     T_hull = x_dict["T_canoe"]
     target_nabla = config.fixed.target_displacement
     rho = config.fixed.rho_water
@@ -115,6 +115,12 @@ def _validate_single(design_vector: np.ndarray, design_id: int,
         config=config,
     )
     logger.info(f"Design {design_id}: geometry at {stl_path}")
+    # Bug #172-B: price the built beam in all gates below.
+    from hull_opt.hydrostatics import measured_beam as _mb
+    try:
+        B = _mb(x_dict, hydro)
+    except Exception:
+        pass
 
     # ── Rapid gate evaluation (Tier-1) for gates 2/4/5 ────────────────
     if rapid is None:
@@ -446,7 +452,8 @@ def _gate_fine_cfd(case_dir, stl_path, speed_ms, LWL, B, T_hull,
             return hb
     else:
         half_breadth_func = lambda x, z: 0.0
-    Rw_raw = compute_wave_resistance_michell(half_breadth_func, LWL, B, T_hull + D_keel,
+    from hull_opt.hydrostatics import eff_draft as _ed
+    Rw_raw = compute_wave_resistance_michell(half_breadth_func, LWL, B, _ed(x_dict, hydro) + D_keel,
                                               speed_ms, config.fixed.rho_water,
                                               config.fixed.gravity,
                                               n_z=max(20, int(np.ceil(20 * (T_hull + D_keel) / max(T_hull, 1e-6)))))

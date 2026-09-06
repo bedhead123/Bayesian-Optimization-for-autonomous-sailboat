@@ -486,7 +486,13 @@ def test_topside_underwater_rows_use_section_curve():
     from hull_opt.geometry import _build_nurbs_control_net, _section_curve
     ctrl = _build_nurbs_control_net(_FLARE_X_DICT)
     BWL = _FLARE_X_DICT["BWL"]
-    for i, xn in enumerate(np.linspace(0.0, 1.0, 13)):
+    # Bug #172-C: u-rows now include the planform peak insert — derive the
+    # same station positions the net was built on.
+    import numpy as _np
+    _peak = 0.45 + float(_np.clip((_FLARE_X_DICT["LCB"] - 45.0) / 100.0, -0.15, 0.15))
+    _u = _np.unique(_np.clip(_np.concatenate([_np.linspace(0.0, 1.0, 13), [_peak]]), 0.0, 1.0))
+    assert ctrl.shape[0] == len(_u)
+    for i, xn in enumerate(_u):
         if xn <= 0.0 or xn >= 1.0 - 1e-12:
             continue
         T_local = _FLARE_X_DICT["T_canoe"] * (1.0 - 0.3 * (1.0 - xn))

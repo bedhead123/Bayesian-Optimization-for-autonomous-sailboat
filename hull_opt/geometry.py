@@ -546,6 +546,88 @@ def _log_boundary_edges(mesh, logger, n_quantiles: int = 4) -> None:
         pass
 
 
+def mesh_waterplane_area(mesh) -> float:
+    """Waterplane area at z=0 via section polygons. 0.0 on failure."""
+    try:
+        sec = mesh.section(plane_origin=[0.0, 0.0, 0.0],
+                           plane_normal=[0.0, 0.0, 1.0])
+        if sec is None:
+            return 0.0
+        import trimesh as _tm
+        polys = sec.to_planar()[0].polygons_full
+        return float(sum(getattr(p, "area", 0.0) for p in polys))
+    except Exception:
+        return 0.0
+
+
+def _beam_sinkage_pass(patches: list[NURBSPatch], x_dict: dict,
+                       BWL: float, target_vol: float | None,
+                       n_iter: int = 3):
+    """Bug #172-A: close beam AND volume together, in place on patches.
+
+    SAC matched volume with the wrong beam (surface undershoots the net);
+    naval architecture closes beam first, then re-floats for volume.
+    Each iter: y-gain hull-patch breadths toward BWL/2 at the waterline,
+    rigid z-shift toward target submerged volume, rebuild deck,
+    re-tessellate. Damped (0.7), watertight-guarded (keeps last good).
+    Returns (hull_mesh, sinkage_m, BWL_measured); sinkage > 0 = floated
+    shallower (mesh shifted up). Pure geometry — callers thread
+    T_eff = T + sinkage into analytic draft consumers; mesh consumers
+    are exact by construction.
+    """
+    sinkage = 0.0
+    mesh = None
+    for _ in range(max(1, n_iter)):
+        try:
+            hull_only = [p for p in patches
+                         if ("hull" in p.name or p.name == "deck") and not p.is_mirrored]
+            mesh = _tessellate_patches(hull_only, dp=0.03, require_watertight=True)
+            if mesh is None or len(mesh.vertices) < 4 or not mesh.is_watertight:
+                break
+            vv = np.asarray(mesh.vertices)
+            wlm = vv[np.abs(vv[:, 2]) < 0.005]
+            if len(wlm) == 0:
+                break
+            half = float(wlm[:, 1].max() - wlm[:, 1].min()) / 2.0
+            if not np.isfinite(half) or half <= 1e-6:
+                break
+            y_gain = float(np.clip((BWL / 2.0) / half, 0.5, 2.0))
+            y_gain = 1.0 + 0.7 * (y_gain - 1.0)
+            for p in patches:
+                if "hull" in p.name:
+                    p.control_net[:, :, 1] *= y_gain
+            # Rebuild deck from scaled port hull, then measure volume.
+            port = next(p for p in patches if p.name == "hull_port")
+            patches[:] = [p for p in patches if p.name != "deck"] + [_build_deck_patch(port, x_dict)]
+            hull_only = [p for p in patches
+                         if ("hull" in p.name or p.name == "deck") and not p.is_mirrored]
+            mesh = _tessellate_patches(hull_only, dp=0.03, require_watertight=True)
+            if mesh is None or len(mesh.vertices) < 4 or not mesh.is_watertight:
+                break
+            if target_vol is not None and target_vol > 0:
+                vsub = mesh_displacement(mesh, 0.0)
+                awp = mesh_waterplane_area(mesh)
+                if vsub > 0 and awp > 1e-6:
+                    dz = 0.7 * (vsub - target_vol) / awp  # +dz: too deep, float up
+                    dz = float(np.clip(dz, -0.10, 0.10))
+                    for p in patches:
+                        p.control_net[:, :, 2] += dz
+                    sinkage += dz
+        except Exception:
+            break
+    # Final measure on as-built patches.
+    try:
+        hull_only = [p for p in patches
+                     if ("hull" in p.name or p.name == "deck") and not p.is_mirrored]
+        mesh = _tessellate_patches(hull_only, dp=0.03, require_watertight=False)
+        vv = np.asarray(mesh.vertices)
+        wlm = vv[np.abs(vv[:, 2]) < 0.005]
+        bwl_m = float(wlm[:, 1].max() - wlm[:, 1].min()) if len(wlm) else float(BWL)
+    except Exception:
+        bwl_m = float(BWL)
+    return mesh, float(sinkage), float(bwl_m)
+
+
 def _tessellate_patches(patches: list[NURBSPatch],
                          dp: float = 0.01,
                          require_watertight: bool = True) -> trimesh.Trimesh:
@@ -1048,8 +1130,16 @@ def _build_nurbs_control_net(x_dict: dict) -> np.ndarray:
     stem_rake = float(x_dict.get("stem_rake_deg", 0.0))
     forefoot_cut = float(x_dict.get("forefoot_cut", 0.0))
 
-    u_pos = np.linspace(0.0, 1.0, 13)
-    v_lev = np.linspace(0.0, 1.0, 9)
+    # Bug #172-C: sample the planform peak — uniform u-rows straddled the
+    # peak (0.45 + LCB shift) without sampling it, surrendering ~5% beam
+    # before tessellation even starts.
+    _peak = 0.45 + float(np.clip((LCB_val - 45.0) / 100.0, -0.15, 0.15))
+    u_pos = np.unique(np.clip(np.concatenate(
+        [np.linspace(0.0, 1.0, 13), [_peak]]), 0.0, 1.0))
+    # Bug #172-C: cluster v-rows around the waterline elbow (deadrise /
+    # bilge knuckle) where cubic blending cut ~20% off the breadth.
+    # WL sits at vf = T/(T+sheer) ≈ 0.43; bracket it densely.
+    v_lev = np.array([0.0, 0.15, 0.28, 0.38, 0.46, 0.54, 0.65, 0.78, 1.0])
     n_u, n_v = len(u_pos), len(v_lev)
 
     # Waterline half-breadth at each u control point
@@ -1376,6 +1466,22 @@ def generate_hull(design_vector: np.ndarray,
                 f"(boundary edges remain) — infeasible design (stored as E_GEOM)"
             )
 
+        # Bug #172-A: beam/sinkage closure pass (mutates patches + hull_mesh).
+        # target_eff is the converged displacement target (may be None).
+        try:
+            _t_eff = target_eff
+        except Exception:
+            _t_eff = None
+        try:
+            hull_mesh, _sinkage, _bwl_m = _beam_sinkage_pass(
+                patches, x_dict, BWL, _t_eff)
+            if hull_mesh is None or len(hull_mesh.vertices) < 4:
+                raise ValueError("beam/sinkage pass degenerated the mesh")
+        except Exception as _e:
+            _sinkage, _bwl_m = 0.0, float(BWL)
+        hydro_sinkage = float(_sinkage)
+        hydro_bwl_measured = float(_bwl_m)
+
         # Combined STL (hull+deck only) drives GZ/BEM/low-fi. Keel+bulb are
         # separate NURBS patches exported ONLY to hull_full.stl for SPH
         # preview/validation (open shells, require_watertight=False). GZ/BEM
@@ -1455,6 +1561,21 @@ def generate_hull(design_vector: np.ndarray,
             mast_cg_z=mast_cg_z,
             mast_cg_x=mast_cg_x)
         hydro["nurbs_patches_file"] = nurbs_pickle
+        # Bug #172-B: measure what was actually built. The BWL param sculpts
+        # the control net but the surface undershoots it — downstream physics
+        # must price the mesh, not the wish. (Re-float in A forces exact.)
+        # Bug #172-A: beam/sinkage closure results (post-pass hull_mesh).
+        try:
+            _vv = np.asarray(hull_mesh.vertices)
+            _wlm = _vv[np.abs(_vv[:, 2]) < 0.005]
+            hydro["BWL_measured"] = float(_wlm[:, 1].max() - _wlm[:, 1].min()) \
+                if len(_wlm) else float(BWL)
+        except Exception:
+            hydro["BWL_measured"] = float(BWL)
+        try:
+            hydro["sinkage_m"] = float(hydro_sinkage)
+        except Exception:
+            hydro["sinkage_m"] = 0.0
 
         # Validate NURBS patches
         from hull_opt.geometry_validator import validate_nurbs_patches, validate_nurbs_closed_surface
@@ -1834,8 +1955,10 @@ def _compute_hydrostatics(mesh: trimesh.Trimesh, LWL: float,
     if x_dict is not None:
         from hull_opt.hydrostatics import compute_cg_z as _h_cg_z, compute_cg_x as _h_cg_x
         try:
-            cg_z = _h_cg_z(x_dict, nabla=volume, config=config)
-            cg_x = _h_cg_x(x_dict, config, cb_x=float(center_mass[0]))
+            cg_z = _h_cg_z(x_dict, nabla=volume, config=config,
+                             hydro={"sinkage_m": hydro_sinkage})
+            cg_x = _h_cg_x(x_dict, config, cb_x=float(center_mass[0]),
+                             hydro={"sinkage_m": hydro_sinkage})
             if not np.isfinite(cg_z) or not np.isfinite(cg_x):
                 raise ValueError(f"Non-finite unified CG: z={cg_z}, x={cg_x}")
         except Exception:

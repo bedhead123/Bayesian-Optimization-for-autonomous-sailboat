@@ -55,7 +55,7 @@ except ImportError:
 from hull_opt.param_layer import design_vector_to_physical
 from hull_opt.geometry_validator import validate_design_vector
 from hull_opt.hydrostatics import compute_gz_curve, compute_righting_energy, compute_cg_z, \
-    compute_lumped_inertia
+    compute_lumped_inertia, measured_beam, eff_draft
 from hull_opt.constraints import evaluate_constraints
 from hull_opt.michell import compute_wave_resistance_michell, capped_wave_resistance
 from hull_opt.friction import compute_total_resistance
@@ -168,15 +168,16 @@ def _margin_bonus_clip(v):
     return float(np.tanh(v))
 
 
-def draft_logistics_cost(x_dict: dict, config) -> float:
+def draft_logistics_cost(x_dict: dict, config, hydro: dict | None = None) -> float:
     """Priced inconvenience of draft (Bug #169), not a wall.
 
     Ramp-launchable draft (fixed.draft_free_m) is free; over that, handling
     cost ramps linearly at fixed.draft_logistics_per_m FoM per meter.
-    Benefits CAN outweigh it — BO finds the equilibrium. Pure function.
+    Benefits CAN outweigh it — BO finds the equilibrium. Bug #172-A: prices
+    the re-floated draft. Pure function.
     """
     try:
-        t_tot = float(x_dict.get("T_canoe", 0.0)) + float(x_dict.get("D_keel", 0.0))
+        t_tot = eff_draft(x_dict, hydro) + float(x_dict.get("D_keel", 0.0))
         free = float(getattr(config.fixed, "draft_free_m", 1.0))
         rate = float(getattr(config.fixed, "draft_logistics_per_m", 0.3))
         return max(0.0, rate * (t_tot - free))
@@ -252,7 +253,7 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
 
     # 2. GZ curve with ballast-derived CG (hull-only mesh, keel CG approximated)
     try:
-        cg_z = hydro.get("cg_z", compute_cg_z(x_dict, nabla=hydro.get("underwater_volume", hydro.get("nabla")), config=config))
+        cg_z = hydro.get("cg_z", compute_cg_z(x_dict, nabla=hydro.get("underwater_volume", hydro.get("nabla")), config=config, hydro=hydro))
         if not np.isfinite(cg_z):
             raise ValueError(f"Non-finite CG_z: {cg_z}")
         gz_patches = None
@@ -308,8 +309,8 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
         Rw_raw = compute_wave_resistance_michell(
             half_breadth_func,
             LWL=hull_lwl,
-            B=x_dict["BWL"],
-            T=x_dict["T_canoe"] + D_keel,
+            B=measured_beam(x_dict, hydro),  # Bug #172-B: price built beam
+            T=eff_draft(x_dict, hydro) + D_keel,  # Bug #172-A: re-floated draft
             speed_ms=speed_ms,
             rho=config.fixed.rho_water,
             g=config.fixed.gravity,
@@ -377,7 +378,7 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
     try:
         if bem_skip:
             gm = hydro.get("GM", hydro.get("gm", 0.1))
-            bwl = x_dict.get("BWL", 0.5)
+            bwl = measured_beam(x_dict, hydro)  # Bug #172-B
             result.roll_period = 2.0 * np.pi * 0.35 * bwl / max(np.sqrt(9.81 * max(gm, 0.01)), 1e-6)
             result.peak_accel = float(getattr(getattr(config, "validation", None), "max_accel_g", 30.0)) * 2.0  # 60g penalty, was 0.0 which incorrectly passed constraints
             result.rao_data = {"omega": [0.0], "heave_rao": [0.0], "pitch_rao": [0.0],
@@ -581,8 +582,8 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
                     Rw_low_raw = compute_wave_resistance_michell(
                         half_breadth_func,
                         LWL=hull_lwl,
-                        B=x_dict["BWL"],
-                        T=x_dict["T_canoe"] + x_dict.get("D_keel", 0.0),
+                        B=measured_beam(x_dict, hydro),  # Bug #172-B
+                        T=eff_draft(x_dict, hydro) + x_dict.get("D_keel", 0.0),  # Bug #172-A
                         speed_ms=speed_low_ms,
                         rho=config.fixed.rho_water,
                         g=config.fixed.gravity,
@@ -742,7 +743,7 @@ def evaluate_low_fidelity(design_vector: np.ndarray, config,
             # wall (helper above). Absolute physical cap (T_total > LWL)
             # stays a hard gate in constraints.py.
             try:
-                result.draft_logistics_cost = draft_logistics_cost(x_dict, config)
+                result.draft_logistics_cost = draft_logistics_cost(x_dict, config, hydro)
                 result.fom -= result.draft_logistics_cost
                 constraints["draft_logistics_cost"] = result.draft_logistics_cost
             except Exception:
@@ -936,7 +937,7 @@ def _compute_raos_capytaine(stl_path: str, config, x_dict: dict,
     rho = config.fixed.rho_water
     g = config.fixed.gravity
 
-    BWL = x_dict.get("BWL", 0.5)
+    BWL = measured_beam(x_dict, hydro)  # Bug #172-B: built beam, not param
     T_canoe = x_dict.get("T_canoe", 0.2)
 
     # CRITICAL ORDER: set center_of_mass BEFORE adding the rigid-body dofs —
@@ -1034,7 +1035,7 @@ def _compute_raos_capytaine(stl_path: str, config, x_dict: dict,
             and omega_vals[_peak_i] > 0 else None
         if wn is None or not np.isfinite(wn):
             gm_h = hydro.get("GM", hydro.get("gm", 0.1))
-            t_roll_an = 2.0 * np.pi * 0.35 * x_dict.get("BWL", 0.55) / \
+            t_roll_an = 2.0 * np.pi * 0.35 * measured_beam(x_dict, hydro) / \
                 max(np.sqrt(config.fixed.gravity * max(gm_h, 0.01)), 1e-6)
             wn = 2.0 * np.pi / max(t_roll_an, 1e-6)
         r = omega_vals / max(wn, 1e-6)

@@ -336,8 +336,9 @@ def _storm_bem_sweep(stl_path, config, x_dict, hydro, design_vector=None, surrog
                 _peak_i = int(np.argmax(ra)) if len(ra) > 1 else 0
                 wn = float(oa[_peak_i]) if 0 < _peak_i < len(oa) - 1 and oa[_peak_i] > 0 else None
                 if wn is None or not np.isfinite(wn):
+                    from hull_opt.hydrostatics import measured_beam as _mb
                     gm_h = hydro.get("GM", hydro.get("gm", 0.1))
-                    t_roll_an = 2.0 * np.pi * 0.35 * x_dict.get("BWL", 0.55) / \
+                    t_roll_an = 2.0 * np.pi * 0.35 * _mb(x_dict, hydro) / \
                         max(np.sqrt(g * max(gm_h, 0.01)), 1e-6)
                     wn = 2.0 * np.pi / max(t_roll_an, 1e-6)
                 rr = oa / max(wn, 1e-6)
@@ -412,7 +413,8 @@ _SLAM_FORCE_FACTOR = 0.85
 
 
 def _slam_accel(p_max, x_dict, hydro, config):
-    BWL = x_dict.get("BWL", 0.5)
+    from hull_opt.hydrostatics import measured_beam as _mb
+    BWL = _mb(x_dict, hydro)  # Bug #172-B: slam area on built beam
     LWL = x_dict.get("LWL", 2.4)
     T_canoe = x_dict.get("T_canoe", 0.25)
     deadrise_deg = x_dict.get("deadrise", 15.0)

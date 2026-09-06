@@ -47,17 +47,20 @@ def test_sheer_flat_mid_kicked_ends():
 
 
 def test_flat_deck_stl_tolerance():
-    # 0.001 mm flatness: deck edge z == E at every station when pinned
+    # 0.001 mm flatness: deck edge z == E + sinkage at every station when
+    # pinned (Bug #172-A: re-float shifts the rigid mesh; flatness is the
+    # directive, absolute height follows buoyancy).
     import tempfile
     from hull_opt.geometry import generate_hull
     cfg = load_config("config.yaml")
     raw = np.zeros(21)
-    stl, _, _, _ = generate_hull(raw, output_dir=tempfile.mkdtemp(), config=cfg,
-                                 target_displacement=0.10)
+    stl, _, hydro, _ = generate_hull(raw, output_dir=tempfile.mkdtemp(), config=cfg,
+                                     target_displacement=0.10)
     import trimesh
     m = trimesh.load(stl)
     d = design_vector_to_physical(raw, config=cfg)
-    assert abs(float(m.bounds[1, 2]) - d["E"]) <= 1e-6
+    deck_z = m.bounds[1, 2]
+    assert abs(float(deck_z) - (d["E"] + hydro.get("sinkage_m", 0.0))) <= 1e-6
 
 
 def test_forefoot_cutaway():
@@ -232,6 +235,19 @@ def test_mission_bands_and_leeway():
     assert leeway_penalty_deg(8.0, lo) < leeway_penalty_deg(8.0, cfg) < leeway_penalty_deg(8.0, hi)
 
 
+def test_measured_beam_and_eff_draft():
+    # Bug #172-B/A: physics prices the built mesh, re-floated draft.
+    from hull_opt.hydrostatics import measured_beam, eff_draft
+    xd = {"BWL": 0.55, "T_canoe": 0.30}
+    assert measured_beam(xd, None) == 0.55
+    assert measured_beam(xd, {}) == 0.55
+    assert measured_beam(xd, {"BWL_measured": 0.41}) == 0.41
+    assert measured_beam(xd, {"BWL_measured": -1.0}) == 0.55  # bad data: fallback
+    assert eff_draft(xd, None) == 0.30
+    assert abs(eff_draft(xd, {"sinkage_m": 0.06}) - 0.24) < 1e-9
+    assert eff_draft(xd, {}) == 0.30
+
+
 def test_mission_columns_reach_report(tmp_path):    # Bug #169 wiring: mission scalars persisted via constraint_values must
     # surface in results.md/CSV, or production runs fly blind on what the
     # FoM actually rewarded.
@@ -240,7 +256,8 @@ def test_mission_columns_reach_report(tmp_path):    # Bug #169 wiring: mission s
     from hull_opt.config import load_config
     cfg = load_config("config.yaml")
     cv = {"mission_drive": 1.23, "gust_margin": 0.4, "heavy_leeway_deg": 5.0,
-          "draft_logistics_cost": 0.35, "T_over_L": 0.32, "mission_fom": 6.25}
+          "draft_logistics_cost": 0.35, "T_over_L": 0.32, "mission_fom": 6.25,
+          "BWL_measured": 0.41}
     row = {"iter": 0, "feasible": 1, "fom": 2.5, "rt_total": 38.0,
            "constraint_values": json.dumps(cv), "constraint_violations": "[]",
            "physical_params": json.dumps(_xdict()), "design_vector": "[]",
@@ -254,7 +271,7 @@ def test_mission_columns_reach_report(tmp_path):    # Bug #169 wiring: mission s
     md = (tmp_path / "results.md").read_text()
     csv_text = (tmp_path / "results.csv").read_text()
     for col in ("mission_drive", "gust_margin", "heavy_leeway_deg",
-                "draft_logistics_cost", "mission_fom"):
+                "draft_logistics_cost", "mission_fom", "BWL_measured"):
         assert col in md
         assert col in csv_text.splitlines()[0]
     assert "1.2300" in md  # value flows through, not just the header

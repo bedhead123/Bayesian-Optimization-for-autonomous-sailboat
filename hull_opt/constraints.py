@@ -11,6 +11,7 @@ from hull_opt.hydrostatics import (
     compute_righting_energy, compute_cg_z, compute_cg_x,
     compute_downflooding_angle, compute_reserve_buoyancy,
     compute_wind_heeling_arm, compute_wind_heel_equilibrium,
+    measured_beam, eff_draft,
 )
 from hull_opt.rig import build_rig, helm_angle_deg, helm_arm, CD_FEATHERED, \
     extended_keel_clr_x, signed_lead_frac
@@ -53,7 +54,11 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
 
     sac_scale = hydro.get("sac_scale_factor", 1.0)
     constraints["B/LWL"] = B / max(1e-10, LWL)
-    constraints["B/LWL_scaled"] = constraints["B/LWL"] * sac_scale
+    # Bug #172-B: B/LWL_scaled estimated beam from params (×sac) while the
+    # surface undershoots it. Record + use the MEASURED mesh beam.
+    B_meas = measured_beam(x_dict, hydro)
+    constraints["BWL_measured"] = B_meas
+    constraints["B/LWL_scaled"] = B_meas / max(1e-10, LWL)
     constraints["Cp"] = Cp
     constraints["actual_Cp"] = hydro.get("actual_Cp", Cp)
     constraints["BM"] = BM
@@ -160,12 +165,12 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
     except Exception:
         pass
 
-    # Beam-to-draft ratio: prevent cartoonishly flat hulls (excessive beam vs depth)
-    # Use actual beam after SAC scaling, not the unscaled design-parameter BWL
+    # Beam-to-draft ratio: prevent cartoonishly flat hulls (excessive beam vs depth).
+    # Bug #172-B: measured mesh beam, not B×sac_scale estimate.
     T_canoe = hydro.get("T_canoe", 0.3)
     if not np.isfinite(T_canoe) or T_canoe <= 0:
         T_canoe = 0.3
-    B_actual = B * sac_scale
+    B_actual = measured_beam(x_dict, hydro)
     if T_canoe > 0:
         beam_draft = B_actual / T_canoe
         constraints["beam_draft_ratio"] = beam_draft
@@ -342,7 +347,7 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
         # Bilge radius vs beam: prevent extreme bilge radius causing bulging sections
         bilge_r = x_dict.get("bilge_r", 0.0)
         if B > 0:
-            br_ratio = bilge_r / B
+            br_ratio = bilge_r / B_meas
             constraints["bilge_r_BWL_ratio"] = br_ratio
             max_br = 0.5 + relaxation * 0.3  # start at 0.8, tighten to 0.5
             if br_ratio > max_br:
@@ -401,7 +406,7 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
         # Downflooding: vessel is fully enclosed/watertight - skip this check
         # df_angle is still computed for info but never triggers a violation
         try:
-            df_angle = compute_downflooding_angle(hull_stl_path or stl_path, cg_z=compute_cg_z(x_dict, nabla=nabla), x_dict=x_dict)
+            df_angle = compute_downflooding_angle(hull_stl_path or stl_path, cg_z=compute_cg_z(x_dict, nabla=nabla, hydro=hydro), x_dict=x_dict)
         except Exception:
             df_angle = 180.0
         constraints["downflooding_angle"] = df_angle
@@ -428,7 +433,8 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
         # handling cost, so over-deep is never infeasible for logistics.
         # The price lives in FoM (draft_logistics_cost, low_fidelity.py).
         # Only hard draft failure left: T_total > LWL (physical RealityCheck).
-        t_total = x_dict["T_canoe"] + x_dict["D_keel"]
+        # Bug #172-A: re-floated draft (mesh shifted by sinkage_m).
+        t_total = eff_draft(x_dict, hydro) + x_dict["D_keel"]
         t_over_l = t_total / max(1e-9, LWL)
         constraints["T_over_L"] = t_over_l
         constraints["T_total_m"] = t_total
@@ -496,7 +502,7 @@ def evaluate_constraints(hydro: dict, gz_curve: np.ndarray,
     if x_dict is not None and config is not None:
         try:
             cb_x = hydro.get("CB_x", None)
-            cg_x = compute_cg_x(x_dict, config, cb_x=cb_x if cb_x is not None else 0.0)
+            cg_x = compute_cg_x(x_dict, config, cb_x=cb_x if cb_x is not None else 0.0, hydro=hydro)
             constraints["cg_x"] = cg_x
             clr_arm = helm_arm(
                 rig["combined"]["z"] if 'rig' in locals() and rig else 1.5, x_dict)
